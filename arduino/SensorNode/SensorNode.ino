@@ -10,7 +10,8 @@
 
 // Pin 13 has an LED connected on most Arduino boards.
 // give it a name:
-int led = 13;
+const int pin_led = 13;
+const int pin_contact1 = 2;
 
 RF24 radio(8, 7);
 
@@ -23,7 +24,9 @@ void setup() {
 	Serial.begin(9600);
 	printf_begin();
 
-	pinMode(led,OUTPUT);
+	pinMode(pin_led, OUTPUT);
+	pinMode(pin_contact1, INPUT_PULLUP);
+	digitalWrite(pin_contact1, HIGH);
 
 	printf("Sensor: %i\n\r", roomState.sensor_id);
 	printf("*** PRESS 'T' to begin transmitting to the other node\n\r");
@@ -31,11 +34,11 @@ void setup() {
 	Serial.println("Initializing radio");
 	radio.begin();
 	radio.setRetries(15, 15);
-        radio.setDataRate(RF24_1MBPS);
-        radio.setPALevel(RF24_PA_LOW);
-        radio.setChannel(76);
-        radio.setCRCLength(RF24_CRC_16);
-        radio.enableDynamicPayloads();
+	radio.setDataRate(RF24_1MBPS);
+	radio.setPALevel(RF24_PA_LOW);
+	radio.setChannel(76);
+	radio.setCRCLength(RF24_CRC_16);
+	radio.enableDynamicPayloads();
 
 	radio.openWritingPipe(pipes[0]);
 	radio.openReadingPipe(1, pipes[1]);
@@ -50,8 +53,11 @@ void setup() {
 
 // the loop routine runs over and over again forever:
 void loop() {
+	//roomState.contact1_alert = !roomState.contact1_alert;
+	digitalWrite(pin_led, HIGH);
 
-	digitalWrite(led,HIGH);
+	roomState.contact1_alert = digitalRead(pin_contact1);
+
 	// First, stop listening so we can talk.
 	radio.stopListening();
 	char s[10];
@@ -84,7 +90,7 @@ void loop() {
 		// Spew it
 		printf("Got response %c \n\r", ack);
 	}
-	digitalWrite(led,LOW);
+	digitalWrite(pin_led, LOW);
 
 	// Try again 1s later
 	delay(1000);

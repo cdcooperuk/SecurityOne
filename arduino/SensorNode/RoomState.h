@@ -18,6 +18,7 @@ public:
 	RoomState(char* serialized_state);
 	virtual ~RoomState();
 	char* toString(char* buf);
+	bool isAlert();
 	uint8_t protocol_version;
 	uint8_t sensor_id;
 	bool contact1_alert;

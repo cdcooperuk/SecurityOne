@@ -41,3 +41,7 @@ char* RoomState::toString(char* buf) {
 	return buf;
 
 }
+
+bool RoomState::isAlert() {
+	return contact1_alert || contact2_alert || contact3_alert || pir_alert;
+}
