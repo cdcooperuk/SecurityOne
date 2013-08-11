@@ -70,16 +70,14 @@ void loop(void)
 	
 
 	 while ( radio.available( &pipe ) ) {
-		printf ("avail\n");
 
 		uint8_t len = radio.getDynamicPayloadSize();
-		printf("avail %d data ",len);
+		// printf("avail %d data ",len);
 		radio.read( receivePayload, len );
-		printf("read %d data",len);
-		printf("read %c %c ...",receivePayload[0],receivePayload[1]);
+		// printf("read %d data",len);
+		// printf("read %c %c ...",receivePayload[0],receivePayload[1]);
 		receivePayload[len]=0; //terminate
 		RoomState rs(receivePayload);
-		printf("initted rs");
 		
 		// Display it on screen
 		char buf[80];
@@ -104,6 +102,10 @@ void loop(void)
 
 		// Enable start listening again
 		radio.startListening();
+
+		if (rs.isAlert()) {
+			printf("\a***ALERT***\n");
+		}
 
 	// Increase the pipe outside the while loop
 	pipe++;
