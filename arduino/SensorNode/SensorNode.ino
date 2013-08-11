@@ -35,7 +35,7 @@ void setup() {
         radio.setPALevel(RF24_PA_LOW);
         radio.setChannel(76);
         radio.setCRCLength(RF24_CRC_16);
-        radio.enableDynamicPayloads()
+        radio.enableDynamicPayloads();
 
 	radio.openWritingPipe(pipes[0]);
 	radio.openReadingPipe(1, pipes[1]);
@@ -55,8 +55,8 @@ void loop() {
 	// First, stop listening so we can talk.
 	radio.stopListening();
 	char s[10];
-	printf("Now sending roomstate %s...", roomState.toString(s));
-	bool ok = radio.write(&roomState, sizeof(roomState));
+	printf("Now sending RoomState %s...", roomState.toString(s));
+	bool ok = radio.write(&s, strlen(s));
 
 	if (ok)
 		printf("ok...");

@@ -23,8 +23,8 @@ RoomState::RoomState(char* serialized_state) :
 	int pvInt;
 	int sidInt;
 	printf("constructor %s.\n",serialized_state);
-	sscanf(serialized_state, "(%02d%02d----)",	&pvInt, &sidInt);
-	printf("scanned\n");
+	sscanf(serialized_state, "<%02d%02d---->",	&pvInt, &sidInt);
+	printf("scan completed\n");
 	protocol_version = (uint8_t)pvInt;
 	sensor_id = (uint8_t)sidInt;
 }
@@ -34,7 +34,7 @@ RoomState::~RoomState() {
 }
 
 char* RoomState::toString(char* buf) {
-	sprintf(buf,"(%02d%02d----)",protocol_version, sensor_id);
+	sprintf(buf,"<%02d%02d---->",protocol_version, sensor_id);
 	return buf;
 
 }
