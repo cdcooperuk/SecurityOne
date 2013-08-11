@@ -18,17 +18,15 @@ RoomState::RoomState(char* serialized_state) :
 	int pvInt;
 	int sidInt;
 	int c1, c2, c3, p;
-	printf("constructor %s.\n", serialized_state);
 	sscanf(serialized_state, "[%02d%02d%1d%1d%1d%1d]", &pvInt, &sidInt, &c1,
 			&c2, &c3, &p);
 
-	printf("scan completed\n");
 	protocol_version = (uint8_t) pvInt;
 	sensor_id = (uint8_t) sidInt;
-	contact1_alert=c1;
-	contact2_alert=c2;
-	contact3_alert=c3;
-	pir_alert=p;
+	contact1_alert = c1;
+	contact2_alert = c2;
+	contact3_alert = c3;
+	pir_alert = p;
 }
 
 RoomState::~RoomState() {
