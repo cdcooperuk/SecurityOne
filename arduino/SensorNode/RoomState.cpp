@@ -14,10 +14,17 @@ RoomState::RoomState() : protocol_version(1), sensor_id(1),
 			contact3_alert(false),
 			pir_alert(false)
 			{}
-RoomState::RoomState(char* serialized_state) {
+RoomState::RoomState(char* serialized_state) :
+			contact1_alert(false),
+			contact2_alert(false),
+			contact3_alert(false),
+			pir_alert(false)
+{
 	int pvInt;
 	int sidInt;
-	scanf("(%02d%02d----)",	&pvInt, &sidInt);
+	printf("constructor %s.\n",serialized_state);
+	sscanf(serialized_state, "(%02d%02d----)",	&pvInt, &sidInt);
+	printf("scanned\n");
 	protocol_version = (uint8_t)pvInt;
 	sensor_id = (uint8_t)sidInt;
 }

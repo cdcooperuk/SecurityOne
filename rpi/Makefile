@@ -42,7 +42,7 @@ RoomState.o : RoomState.cpp RoomState.h
 	g++ -c ${CCFLAGS} ${headers}  RoomState.cpp -o $@
 	
 clean:
-	rm -rf $(PROGRAMS) RoomState.*
+	rm -rf $(PROGRAMS) RoomState.* hub.o
 
 install: all
 	test -d $(prefix) || mkdir $(prefix)

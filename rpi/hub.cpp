@@ -73,9 +73,13 @@ void loop(void)
 		printf ("avail\n");
 
 		uint8_t len = radio.getDynamicPayloadSize();
+		printf("avail %d data ",len);
 		radio.read( receivePayload, len );
+		printf("read %d data",len);
+		printf("read %c %c ...",receivePayload[0],receivePayload[1]);
+		receivePayload[len]=0; //terminate
 		RoomState rs(receivePayload);
-		printf("got %d data",len);
+		printf("initted rs");
 		
 		// Display it on screen
 		char buf[80];
