@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 
+
 class RoomState {
 
 public:
@@ -19,6 +20,7 @@ public:
 	virtual ~RoomState();
 	char* toString(char* buf);
 	bool isAlert();
+    static uint8_t getCurrentProtocolVersion();
 	uint8_t protocol_version;
 	uint8_t sensor_id;
 	bool contact1_alert;

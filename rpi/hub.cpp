@@ -31,6 +31,8 @@ RF24 radio("/dev/spidev0.0",8000000,25);  // Setup for GPIO 25 CE
 
 void setup(void)
 {
+	printf("PROTOCOL_VERSION: %i\n\r", RoomState::getCurrentProtocolVersion());
+
 	//
 	// Refer to RF24.h or nRF24L01 DS for settings
 	radio.begin();
@@ -74,10 +76,10 @@ void loop(void)
 	 while ( radio.available( &pipe ) ) {
 
 		uint8_t len = radio.getDynamicPayloadSize();
-		// printf("avail %d data ",len);
+		 printf("avail %d data\n",len);
 		radio.read( receivePayload, len );
-		// printf("read %d data ",len);
-		// printf("read %c %c ...\n",receivePayload[0],receivePayload[1]);
+		printf("read %d data \n",len);
+		//printf("read %c %c ...\n",receivePayload[0],receivePayload[1]);
 		receivePayload[len]=0; //terminate
 		RoomState rs(receivePayload);
 		

@@ -38,7 +38,7 @@ void setup() {
 	init_input_pullup(pin_pir);
 
 	printf("Sensor: %i\n\r", roomState.sensor_id);
-	printf("*** PRESS 'T' to begin transmitting to the other node\n\r");
+	printf("PROTOCOL_VERSION: %i\n\r", RoomState::getCurrentProtocolVersion());
 
 	Serial.println("Initializing radio");
 	radio.begin();
@@ -58,6 +58,7 @@ void setup() {
 	//
 
 	radio.printDetails();
+
 }
 
 void loop() {
@@ -71,7 +72,7 @@ void loop() {
 
 	// First, stop listening so we can talk.
 	radio.stopListening();
-	char s[10];
+	char s[30];
 	printf("Now sending RoomState %s...", roomState.toString(s));
 	bool ok = radio.write(&s, strlen(s));
 

@@ -8,8 +8,12 @@
 #include "RoomState.h"
 #include <inttypes.h>
 
+
+static const char* FMT="[V%02d #%02d A%1d B%1d C%1d P%1d]";
+static uint8_t PROTOCOL_VERSION=2;
+
 RoomState::RoomState() :
-		protocol_version(1), sensor_id(1), contact1_alert(false), contact2_alert(
+		protocol_version(PROTOCOL_VERSION), sensor_id(1), contact1_alert(false), contact2_alert(
 				false), contact3_alert(false), pir_alert(false) {
 }
 RoomState::RoomState(char* serialized_state) :
@@ -18,7 +22,7 @@ RoomState::RoomState(char* serialized_state) :
 	int pvInt;
 	int sidInt;
 	int c1, c2, c3, p;
-	sscanf(serialized_state, "[%02d%02d%1d%1d%1d%1d]", &pvInt, &sidInt, &c1,
+	sscanf(serialized_state, FMT, &pvInt, &sidInt, &c1,
 			&c2, &c3, &p);
 
 	protocol_version = (uint8_t) pvInt;
@@ -34,7 +38,7 @@ RoomState::~RoomState() {
 }
 
 char* RoomState::toString(char* buf) {
-	sprintf(buf, "[%02d%02d%1d%1d%1d%1d]", protocol_version, sensor_id,
+	sprintf(buf, FMT, protocol_version, sensor_id,
 			contact1_alert, contact2_alert, contact3_alert, pir_alert);
 	return buf;
 
@@ -42,4 +46,9 @@ char* RoomState::toString(char* buf) {
 
 bool RoomState::isAlert() {
 	return contact1_alert || contact2_alert || contact3_alert || pir_alert;
+}
+
+
+uint8_t RoomState::getCurrentProtocolVersion(){
+	return PROTOCOL_VERSION;
 }
