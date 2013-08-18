@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="it.baeyens.avreclipse.toolchain.winavr.base.1608333636">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="it.baeyens.avreclipse.toolchain.winavr.base.1608333636" moduleId="org.eclipse.cdt.core.settings" name="Default">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration buildProperties="" id="it.baeyens.avreclipse.toolchain.winavr.base.1608333636" name="Default" parent="org.eclipse.cdt.build.core.emptycfg">
+					<folderInfo id="it.baeyens.avreclipse.toolchain.winavr.base.1608333636.1379235835" name="/" resourcePath="">
+						<toolChain id="it.baeyens.avreclipse.toolchain.winavr.base.1500439008" name="it.baeyens.avreclipse.toolchain.winavr.base" superClass="it.baeyens.avreclipse.toolchain.winavr.base">
+							<option id="it.baeyens.avreclipse.toolchain.options.toolchain.objcopy.flash.164927752" name="Generate HEX file for Flash memory" superClass="it.baeyens.avreclipse.toolchain.options.toolchain.objcopy.flash"/>
+							<option id="it.baeyens.avreclipse.toolchain.options.toolchain.objcopy.eeprom.1957234938" name="Generate HEX file for EEPROM" superClass="it.baeyens.avreclipse.toolchain.options.toolchain.objcopy.eeprom"/>
+							<option id="it.baeyens.avreclipse.toolchain.options.toolchain.objdump.939743109" name="Generate Extended Listing (Source + generated Assembler)" superClass="it.baeyens.avreclipse.toolchain.options.toolchain.objdump"/>
+							<option id="it.baeyens.avreclipse.toolchain.options.toolchain.size.1257822891" name="Print Size" superClass="it.baeyens.avreclipse.toolchain.options.toolchain.size"/>
+							<option id="it.baeyens.avreclipse.toolchain.options.toolchain.avrdude.781613900" name="AVRDude" superClass="it.baeyens.avreclipse.toolchain.options.toolchain.avrdude"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="it.baeyens.avreclipse.targetplatform.avr.675245999" name="AVR Cross-Target" osList="all" superClass="it.baeyens.avreclipse.targetplatform.avr"/>
+							<builder id="it.baeyens.avreclipse.target.builder.winavr.base.784804527" managedBuildOn="false" name="AVR GNU Make Builder.Default" superClass="it.baeyens.avreclipse.target.builder.winavr.base"/>
+							<tool id="it.baeyens.avreclipse.tool.assembler.winavr.base.785548464" name="AVR Assembler" superClass="it.baeyens.avreclipse.tool.assembler.winavr.base">
+								<inputType id="it.baeyens.avreclipse.tool.assembler.input.2044552545" superClass="it.baeyens.avreclipse.tool.assembler.input"/>
+							</tool>
+							<tool id="it.baeyens.avreclipse.tool.compiler.winavr.base.1817175625" name="AVR Compiler" superClass="it.baeyens.avreclipse.tool.compiler.winavr.base">
+								<inputType id="it.baeyens.avreclipse.compiler.winavr.input.1004493467" name="C Source Files" superClass="it.baeyens.avreclipse.compiler.winavr.input"/>
+							</tool>
+							<tool id="it.baeyens.avreclipse.tool.cppcompiler.base.262388888" name="AVR C++ Compiler" superClass="it.baeyens.avreclipse.tool.cppcompiler.base">
+								<inputType id="it.baeyens.avreclipse.cppcompiler.input.799214748" superClass="it.baeyens.avreclipse.cppcompiler.input"/>
+							</tool>
+							<tool id="it.baeyens.avreclipse.tool.linker.winavr.base.419357465" name="AVR C Linker" superClass="it.baeyens.avreclipse.tool.linker.winavr.base"/>
+							<tool id="it.baeyens.avreclipse.tool.cpplinker.base.1176946084" name="AVR C++ Linker" superClass="it.baeyens.avreclipse.tool.cpplinker.base"/>
+							<tool id="it.baeyens.avreclipse.tool.archiver.winavr.base.1973965660" name="AVR Archiver" superClass="it.baeyens.avreclipse.tool.archiver.winavr.base"/>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="rpi.null.909459846" name="rpi"/>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
+		<buildTargets>
+			<target name="hub" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments/>
+				<buildTarget>hub</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+		</buildTargets>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+</cproject>

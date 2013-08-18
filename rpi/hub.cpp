@@ -58,7 +58,9 @@ void setup(void)
 	// Start Listening
 	radio.startListening();
 
+	printf("+++ RADIO DETAILS +++\n");
 	radio.printDetails();
+	printf("---------------------\n");
 	printf("\n\rOutput below : \n\r");
 	usleep(1000);
 }

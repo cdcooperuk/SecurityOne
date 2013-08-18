@@ -11,6 +11,9 @@
 # use make all and make install to install the examples
 # You can change the install directory by editing the prefix line
 #
+HW=$(shell uname -m)
+include Makefile.$(HW)
+
 prefix := /usr/local
 headers := -I ../../RF24/librf24-rpi/librf24/
 
@@ -29,17 +32,14 @@ RoomState.h: ../arduino/SensorNode/RoomState.h
 RoomState.cpp: ../arduino/SensorNode/RoomState.cpp
 	cp ../arduino/SensorNode/RoomState.cpp .
 
-#${PROGRAMS}: ${SOURCES}
-#	g++ ${CCFLAGS} ${headers} -L../../RF24/librf24-rpi/librf24/  -lrf24 $@.cpp -o $@
-
 hub : hub.o RoomState.o
-	g++ ${CCFLAGS} ${headers} -L../../RF24/librf24-rpi/librf24/  -lrf24 hub.o RoomState.o -o hub
+	$(CXX) ${CCFLAGS} ${headers} -L../../RF24/librf24-rpi/librf24/  -lrf24 hub.o RoomState.o -o hub
 	
 hub.o : hub.cpp RoomState.h
-	g++ -c ${CCFLAGS} ${headers}  hub.cpp -o $@
+	$(CXX) -c ${CCFLAGS} ${headers}  hub.cpp -o $@
 	
 RoomState.o : RoomState.cpp RoomState.h
-	g++ -c ${CCFLAGS} ${headers}  RoomState.cpp -o $@
+	$(CXX) -c ${CCFLAGS} ${headers}  RoomState.cpp -o $@
 	
 clean:
 	rm -rf $(PROGRAMS) RoomState.* hub.o
