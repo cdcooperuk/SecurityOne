@@ -76,8 +76,8 @@ void loop(void)
 		uint8_t len = radio.getDynamicPayloadSize();
 		// printf("avail %d data ",len);
 		radio.read( receivePayload, len );
-		printf("read %d data ",len);
-		printf("read %c %c ...\n",receivePayload[0],receivePayload[1]);
+		// printf("read %d data ",len);
+		// printf("read %c %c ...\n",receivePayload[0],receivePayload[1]);
 		receivePayload[len]=0; //terminate
 		RoomState rs(receivePayload);
 		
