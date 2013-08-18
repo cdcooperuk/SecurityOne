@@ -12,6 +12,9 @@
 // give it a name:
 const int pin_led = 13;
 const int pin_contact1 = 2;
+const int pin_contact2 = NOT_A_PIN;
+const int pin_contact3 = NOT_A_PIN;
+const int pin_pir = 3;
 
 RF24 radio(8, 7);
 
@@ -19,14 +22,20 @@ RoomState roomState;
 
 const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 
-// the setup routine runs once when you press reset:
+void init_input_pullup(const int pin) {
+	pinMode(pin, INPUT_PULLUP);
+	digitalWrite(pin, HIGH);
+}
+
 void setup() {
 	Serial.begin(9600);
 	printf_begin();
 
 	pinMode(pin_led, OUTPUT);
-	pinMode(pin_contact1, INPUT_PULLUP);
-	digitalWrite(pin_contact1, HIGH);
+	init_input_pullup(pin_contact1);
+	init_input_pullup(pin_contact2);
+	init_input_pullup(pin_contact3);
+	init_input_pullup(pin_pir);
 
 	printf("Sensor: %i\n\r", roomState.sensor_id);
 	printf("*** PRESS 'T' to begin transmitting to the other node\n\r");
@@ -51,12 +60,14 @@ void setup() {
 	radio.printDetails();
 }
 
-// the loop routine runs over and over again forever:
 void loop() {
-	//roomState.contact1_alert = !roomState.contact1_alert;
 	digitalWrite(pin_led, HIGH);
 
+	// check inputs contact -- rely on NOT_A_PIN returning 0
 	roomState.contact1_alert = digitalRead(pin_contact1);
+//	roomState.contact2_alert = digitalRead(pin_contact2);
+//	roomState.contact3_alert = digitalRead(pin_contact3);
+	roomState.pir_alert = digitalRead(pin_pir);
 
 	// First, stop listening so we can talk.
 	radio.stopListening();
