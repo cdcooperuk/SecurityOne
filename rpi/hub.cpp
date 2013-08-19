@@ -73,6 +73,7 @@ void loop(void)
 	uint8_t pipe = 0;
 	
 
+	 //printf("in loop\n");
 	 while ( radio.available( &pipe ) ) {
 
 		uint8_t len = radio.getDynamicPayloadSize();

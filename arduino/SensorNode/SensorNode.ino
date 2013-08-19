@@ -20,7 +20,8 @@ RF24 radio(8, 7);
 
 RoomState roomState;
 
-const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
+const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0E1LL };
+//const uint64_t pipes[2] = { 0xF0F0F0F0D2LL, 0xF0F0F0F0E1LL };
 
 void init_input_pullup(const int pin) {
 	pinMode(pin, INPUT_PULLUP);
@@ -33,8 +34,8 @@ void setup() {
 
 	pinMode(pin_led, OUTPUT);
 	init_input_pullup(pin_contact1);
-	init_input_pullup(pin_contact2);
-	init_input_pullup(pin_contact3);
+	//init_input_pullup(pin_contact2);
+	//init_input_pullup(pin_contact3);
 	init_input_pullup(pin_pir);
 
 	printf("Sensor: %i\n\r", roomState.sensor_id);
@@ -50,8 +51,8 @@ void setup() {
 	radio.enableDynamicPayloads();
 
 	radio.openWritingPipe(pipes[0]);
-	radio.openReadingPipe(1, pipes[1]);
-	radio.startListening();
+	//radio.openReadingPipe(1, pipes[1]);
+	//radio.startListening();
 
 	//
 	// Dump the configuration of the rf unit for debugging
@@ -71,37 +72,38 @@ void loop() {
 	roomState.pir_alert = digitalRead(pin_pir);
 
 	// First, stop listening so we can talk.
-	radio.stopListening();
+	//radio.stopListening();
 	char s[30];
-	printf("Now sending RoomState %s...", roomState.toString(s));
-	bool ok = radio.write(&s, strlen(s));
+	roomState.toString(s);
+	printf("Now sending RoomState '%s' (%d) ...", s, strlen(s));
+	bool ok = radio.write(&s, strlen(s), false);
 
 	if (ok)
-		printf("ok...");
+		printf("ok...\n");
 	else
 		printf("failed.\n\r");
 
 	// Now, continue listening
-	radio.startListening();
+	//radio.startListening();
 
 	// Wait here until we get a response, or timeout (250ms)
-	unsigned long started_waiting_at = millis();
-	bool timeout = false;
-	while (!radio.available() && !timeout)
-		if (millis() - started_waiting_at > 200)
-			timeout = true;
-
-	// Describe the results
-	if (timeout) {
-		printf("Failed, response timed out.\n\r");
-	} else {
-		// Grab the response, compare, and send to debugging spew
-		char ack;
-		radio.read(&ack, sizeof(char));
-
-		// Spew it
-		printf("Got response %c \n\r", ack);
-	}
+//	unsigned long started_waiting_at = millis();
+//	bool timeout = false;
+//	while (!radio.available() && !timeout)
+//		if (millis() - started_waiting_at > 200)
+//			timeout = true;
+//
+//	// Describe the results
+//	if (timeout) {
+//		printf("Failed, response timed out.\n\r");
+//	} else {
+//		// Grab the response, compare, and send to debugging spew
+//		char ack;
+//		radio.read(&ack, sizeof(char));
+//
+//		// Spew it
+//		printf("Got response %c \n\r", ack);
+//	}
 	digitalWrite(pin_led, LOW);
 
 	// Try again 1s later
