@@ -12,8 +12,8 @@
 static const char* FMT="[V%02d #%02d A%1d B%1d C%1d P%1d]";
 static uint8_t PROTOCOL_VERSION=2;
 
-RoomState::RoomState() :
-		protocol_version(PROTOCOL_VERSION), sensor_id(1), contact1_alert(false), contact2_alert(
+RoomState::RoomState(const int nodeId) :
+		protocol_version(PROTOCOL_VERSION), sensor_id(nodeId), contact1_alert(false), contact2_alert(
 				false), contact3_alert(false), pir_alert(false) {
 }
 RoomState::RoomState(char* serialized_state) :

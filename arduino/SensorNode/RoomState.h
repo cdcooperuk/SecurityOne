@@ -15,7 +15,7 @@
 class RoomState {
 
 public:
-	RoomState();
+	RoomState(const int nodeId);
 	RoomState(char* serialized_state);
 	virtual ~RoomState();
 	char* toString(char* buf);
