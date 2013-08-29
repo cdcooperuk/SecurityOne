@@ -23,7 +23,7 @@ using namespace std;
 // Radio pipe addresses for the 2 nodes to communicate.
 // First pipe is for writing, 2nd, 3rd, 4th, 5th & 6th is for reading...
 // Pipe0 in bytes is "serv1" for mirf compatibility
-const uint64_t pipes[6] = { 0xF0F0F0F0D2LL, 0xF0F0F0F0E1LL, 0xF0F0F0F0E2LL, 0xF0F0F0F0E3LL, 0xF0F0F0F0E4, 0xF0F0F0F0E5 };
+const uint64_t pipes[6] = { 0xF0F0F0F0D2LL, 0xF0F0F0F001LL, 0xF0F0F0F002LL, 0xF0F0F0F003LL, 0xF0F0F0F004, 0xF0F0F0F005 };
 
 // CE and CSN pins On header using GPIO numbering (not pin numbers)
 RF24 radio("/dev/spidev0.0",8000000,25);  // Setup for GPIO 25 CE

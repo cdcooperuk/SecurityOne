@@ -3,13 +3,15 @@
 #include <RF24.h>
 #include <RF24_config.h>
 #include <nRF24L01.h>
+#include <EEPROM.h>
 
 // Do not remove the include below
 #include "SensorNode.h"
 #include "printf.h"
 
-// Pin 13 has an LED connected on most Arduino boards.
-// give it a name:
+// id of this node is burned into eeprom- this way same prog can be used on multiple avrs.
+const int NODE_ID_EEPROM_ADDRESS=0;
+
 const int pin_led = 13;
 const int pin_contact1 = 2;
 const int pin_contact2 = NOT_A_PIN;
@@ -18,7 +20,7 @@ const int pin_pir = 3;
 
 RF24 radio(8, 7);
 
-RoomState roomState(7);
+RoomState roomState(EEPROM.read(NODE_ID_EEPROM_ADDRESS));
 
 const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0E1LL };
 //const uint64_t pipes[2] = { 0xF0F0F0F0D2LL, 0xF0F0F0F0E1LL };
