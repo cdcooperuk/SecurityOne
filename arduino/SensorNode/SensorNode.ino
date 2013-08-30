@@ -20,10 +20,12 @@ const int pin_pir = 3;
 
 RF24 radio(8, 7);
 
-RoomState roomState(EEPROM.read(NODE_ID_EEPROM_ADDRESS));
+uint8_t myid= EEPROM.read(NODE_ID_EEPROM_ADDRESS);
+RoomState roomState(myid);
 
-const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0E1LL };
-//const uint64_t pipes[2] = { 0xF0F0F0F0D2LL, 0xF0F0F0F0E1LL };
+const uint64_t base_addr =  0xF0F0F0F000LL;
+//my address = base + my id
+uint64_t my_addr = base_addr + myid;
 
 bool isPin(const uint8_t p) {
 	return p != NOT_A_PIN;
@@ -59,7 +61,7 @@ void setup() {
 	radio.setCRCLength(RF24_CRC_16);
 	radio.enableDynamicPayloads();
 
-	radio.openWritingPipe(pipes[0]);
+	radio.openWritingPipe(my_addr);
 
 	//
 	// Dump the configuration of the rf unit for debugging
@@ -72,6 +74,7 @@ void loop() {
 	digitalWrite(pin_led, HIGH);
 
 	// check inputs contact -- rely on NOT_A_PIN returning 0
+
 	roomState.contact1_alert = digitalRead(pin_contact1);
 	roomState.contact2_alert = isPin(pin_contact2) && digitalRead(pin_contact2);
 	roomState.contact3_alert = isPin(pin_contact3) && digitalRead(pin_contact3);
