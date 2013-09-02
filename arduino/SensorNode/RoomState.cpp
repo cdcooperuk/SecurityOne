@@ -13,20 +13,20 @@ static const char* FMT="[V%02d #%02d A%1d B%1d C%1d P%1d]";
 static uint8_t PROTOCOL_VERSION=2;
 
 RoomState::RoomState(const int nodeId) :
-		protocol_version(PROTOCOL_VERSION), sensor_id(nodeId), contact1_alert(false), contact2_alert(
+		protocol_version(PROTOCOL_VERSION), node_id(nodeId), contact1_alert(false), contact2_alert(
 				false), contact3_alert(false), pir_alert(false) {
 }
 RoomState::RoomState(char* serialized_state) :
 		contact1_alert(false), contact2_alert(false), contact3_alert(false), pir_alert(
 				false) {
 	int pvInt;
-	int sidInt;
+	int nidInt;
 	int c1, c2, c3, p;
-	sscanf(serialized_state, FMT, &pvInt, &sidInt, &c1,
+	sscanf(serialized_state, FMT, &pvInt, &nidInt, &c1,
 			&c2, &c3, &p);
 
 	protocol_version = (uint8_t) pvInt;
-	sensor_id = (uint8_t) sidInt;
+	node_id = (uint8_t) nidInt;
 	contact1_alert = c1;
 	contact2_alert = c2;
 	contact3_alert = c3;
@@ -38,7 +38,7 @@ RoomState::~RoomState() {
 }
 
 char* RoomState::toString(char* buf) {
-	sprintf(buf, FMT, protocol_version, sensor_id,
+	sprintf(buf, FMT, protocol_version, node_id,
 			contact1_alert, contact2_alert, contact3_alert, pir_alert);
 	return buf;
 

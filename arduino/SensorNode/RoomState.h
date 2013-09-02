@@ -22,7 +22,7 @@ public:
 	bool isAlert();
     static uint8_t getCurrentProtocolVersion();
 	uint8_t protocol_version;
-	uint8_t sensor_id;
+	uint8_t node_id;
 	bool contact1_alert;
 	bool contact2_alert;
 	bool contact3_alert;
