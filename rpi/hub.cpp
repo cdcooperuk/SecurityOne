@@ -30,6 +30,11 @@ const uint64_t pipes[6] = { 0xF0F0F0F0D2LL, 0xF0F0F0F001LL, 0xF0F0F0F002LL,
 // CE and CSN pins On header using GPIO numbering (not pin numbers)
 RF24 radio("/dev/spidev0.0", 8000000, 25);  // Setup for GPIO 25 CE
 
+void printSensor(const time_t clk, const char *hr_clk, const uint8_t node_id,
+		const char* sensor_id, const bool alerted) {
+	printf("%d %s node=%d %s=%1d\n", (int)clk, hr_clk, node_id, sensor_id,
+			alerted);
+}
 void setup(void) {
 	printf("PROTOCOL_VERSION: %i\n\r", RoomState::getCurrentProtocolVersion());
 
@@ -70,7 +75,7 @@ void loop(void) {
 	char receivePayload[32];
 	uint8_t pipe = 0;
 
-	//printf("in loop\n");
+	//IF_SERIAL_DEBUG(printf("in loop\n"));
 	while (radio.available(&pipe)) {
 
 		uint8_t len = radio.getDynamicPayloadSize();
@@ -103,13 +108,17 @@ void loop(void) {
 		}
 
 		time_t clk = time(NULL);
-		char *clock_time = ctime(&clk);
+		char *hr_clk = ctime(&clk);
 		// remove trailing \n
-		int l=strlen(clock_time);
-		clock_time[l-1]='\0';
-		printf("%d %s node=%d A=%1d B=%1d C=%1d P=%1d\n", (int) time(NULL),
-				clock_time, rs.node_id, rs.contact1_alert, rs.contact2_alert,
-				rs.contact3_alert, rs.pir_alert);
+		int l = strlen(hr_clk);
+		hr_clk[l - 1] = '\0';
+//		printf("%d %s node=%d A=%1d B=%1d C=%1d P=%1d\n", clk, hr_clk,
+//				rs.node_id, rs.contact1_alert, rs.contact2_alert,
+//				rs.contact3_alert, rs.pir_alert);
+		printSensor(clk, hr_clk, rs.node_id, "c1", rs.contact1_alert);
+		printSensor(clk, hr_clk, rs.node_id, "c1", rs.contact2_alert);
+		printSensor(clk, hr_clk, rs.node_id, "c3", rs.contact3_alert);
+		printSensor(clk, hr_clk, rs.node_id, "p", rs.pir_alert);
 
 		// Enable start listening again
 		radio.startListening();
@@ -121,6 +130,7 @@ void loop(void) {
 		usleep(20);
 	}
 }
+
 
 int main(int argc, char** argv) {
 	setup();
