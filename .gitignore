@@ -8,6 +8,9 @@
 .*.swp
 *.orig
 .swp
+.cproject
+.project
+.settings
 output/
 ojam/
 out/

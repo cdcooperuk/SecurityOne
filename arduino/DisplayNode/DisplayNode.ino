@@ -66,10 +66,10 @@ void setup(void) {
 
 	tft.setRotation(2);
 
-	tft.fillScreen(ST7735_CYAN);
+	currentScreen->clear();
 
 	tft.setTextColor(ST7735_BLACK);
-	tft.print(F("Initializing system (TFT)"));
+	tft.print(F("Initializing system"));
 	initComms();
 	zoneInfo = obtainZoneInfo();
 	currentScreen->clear();
@@ -91,17 +91,23 @@ void initComms() {
 
 ZoneInfo obtainZoneInfo() {
 	ZoneInfo *zi = new ZoneInfo();
-	int nzones = 6;
+	int nzones = 12;
 	zi->setNumZones(nzones);
-	debug("obtainZoneInfo nzones=");
-	debug(zi->getNumZones());
+	debug("obtainZoneInfo nzones=");debug(zi->getNumZones());
 	zi->zones = (struct Zone*) malloc(sizeof(struct Zone) * nzones);
-	zi->zones[0] = {"O&I",20,10, 30, 40,false};
-	zi->zones[1] = {"master",50,10, 50, 30,false};
-	zi->zones[2] = {"G&H",20,50, 30, 40,false};
-	zi->zones[3] = {"hall",50,40, 20, 40,true};
-	zi->zones[4] = {"E",70,40, 20, 20,false};
-	zi->zones[5] = {"bathroom",50,80, 20, 10,false};
+	zi->zones[0] = {"BB", 5, 5, 35, 30, false};
+	zi->zones[1] = {"MB", 40, 5, 40, 22, false};
+	zi->zones[2] = {"FB", 5, 35, 35, 35, false};
+	zi->zones[3] = {"H1", 0,0,0,0, true};
+	zi->zones[4] = {"SB", 70, 27, 20, 20, false};
+	zi->zones[5] = {"B1", 40, 50, 30, 15, false};
+
+	zi->zones[6] = {"DR", 5, 85, 35, 30, false};
+	zi->zones[7] = {"KI", 40, 85, 45, 30, false};
+	zi->zones[8] = {"LO", 5, 115, 35, 35, false};
+	zi->zones[9] = {"Hg", 0,0,0,0,true};
+	zi->zones[10] = {"Bg", 55 ,115, 20, 20, false};
+	zi->zones[11] = {"GA", 70, 135, 15, 15,false};
 	return *zi;
 }
 
@@ -116,8 +122,7 @@ void getInput() {
 void updateDisplay() {
 	debug("updateDisplay()...");
 
-	debug("nzones=");
-	debug(zoneInfo.getNumZones());
+	debug("nzones=");debug(zoneInfo.getNumZones());
 	currentScreen->refresh(zoneInfo);
 	debug("...updateDisplay()");
 }
