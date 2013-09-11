@@ -9,7 +9,7 @@
 #include "ZoneInfo.h"
 #include "debug.h"
 
-MonitorScreen::MonitorScreen(Adafruit_ST7735 *tft) :
+MonitorScreen::MonitorScreen(TFT *tft) :
 		Screen(tft) {
 	// TODO Auto-generated constructor stub
 

@@ -7,12 +7,12 @@
 
 #ifndef SCREEN_H_
 #define SCREEN_H_
-#include <Adafruit_ST7735.h>
+#include <TFT.h>
 #include "ZoneInfo.h"
 
 class Screen {
 public:
-	Screen( Adafruit_ST7735 *tft);
+	Screen( TFT *tft);
 	virtual ~Screen();
 
 	void clear();

@@ -7,7 +7,7 @@
 
 #include "Screen.h"
 
-Screen::Screen( Adafruit_ST7735 *tft) :m_tft(tft) {
+Screen::Screen( TFT *tft) :m_tft(tft) {
 
 }
 

@@ -24,8 +24,7 @@
 #define cs   10
 #define dc   9
 #define rst  8  // you can also connect this to the Arduino reset
-#include <Adafruit_GFX.h>    // Core graphics library
-#include <Adafruit_ST7735.h> // Hardware-specific library
+#include <TFT.h>
 #include <SPI.h>
 
 #include <RF24.h>
@@ -45,7 +44,7 @@
 // (for UNO thats sclk = 13 and sid = 11) and pin 10 must be
 // an output. This is much faster - also required if you want
 // to use the microSD card (see the image drawing example)
-Adafruit_ST7735 tft = Adafruit_ST7735(cs, dc, rst);
+TFT tft = TFT(cs, dc, rst);
 float p = 3.1415926;
 
 RF24 radio(8, 7);
@@ -70,7 +69,7 @@ void setup(void) {
 	tft.fillScreen(ST7735_CYAN);
 
 	tft.setTextColor(ST7735_BLACK);
-	tft.print(F("Initializing system"));
+	tft.print(F("Initializing system (TFT)"));
 	initComms();
 	zoneInfo = obtainZoneInfo();
 	currentScreen->clear();

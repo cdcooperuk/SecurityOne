@@ -19,7 +19,7 @@
 
 class MonitorScreen: public Screen {
 public:
-	MonitorScreen(Adafruit_ST7735 *tft);
+	MonitorScreen(TFT *tft);
 	virtual ~MonitorScreen();
 
 	void refresh(ZoneInfo zoneInfo);
