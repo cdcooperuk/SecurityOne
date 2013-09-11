@@ -16,5 +16,5 @@ Screen::~Screen() {
 }
 
 void Screen::clear(){
-	m_tft->fillScreen(ST7735_CYAN);
+	m_tft->background(0,255,255);
 }

@@ -22,7 +22,7 @@
 //#define sclk 13
 //#define mosi 11
 #define cs   10
-#define dc   9
+#define dc   7
 #define rst  8  // you can also connect this to the Arduino reset
 #include <TFT.h>
 #include <SPI.h>
@@ -71,7 +71,10 @@ void setup(void) {
 	tft.setTextColor(ST7735_BLACK);
 	tft.print(F("Initializing system"));
 	initComms();
+
 	zoneInfo = obtainZoneInfo();
+	tft.println(F("\nReady"));
+
 	currentScreen->clear();
 }
 
@@ -86,7 +89,6 @@ void initComms() {
 		delay(50);
 		tft.print(".");
 	}
-	tft.println(F("\nReady"));
 }
 
 ZoneInfo obtainZoneInfo() {

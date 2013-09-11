@@ -11,9 +11,9 @@
 #include <stdint.h>
 
 struct Zone {
-	char *name;
+	const char *name;
 	uint8_t x, y, w, h;
-	bool fill;
+	bool nodisplay;
 };
 
 class ZoneInfo {

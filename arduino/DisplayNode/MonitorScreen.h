@@ -12,7 +12,8 @@
 #include "ZoneInfo.h"
 
 
-#define COLOUR_NYI   0xBDF7
+#define COLOUR_OUTLINE   0xBDF7
+#define COLOUR_NYI   0xFFFF
 #define COLOUR_ACTIVE   0x7E0
 #define COLOUR_WARNING   0xFFE0
 #define COLOUR_ALERT   0xF800

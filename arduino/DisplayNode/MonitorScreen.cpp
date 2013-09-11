@@ -31,16 +31,20 @@ void MonitorScreen::drawRoom(int i, Zone zone, uint16_t color) {
 		return;
 
 	// temp
+	uint16_t fillcolor;
+
 	switch (random(50)) {
 	case 1:
-		m_tft->fillRect(zone.x, zone.y, zone.w, zone.h, COLOUR_WARNING);
+		fillcolor=COLOUR_WARNING;
 		break;
 	case 2:
-		m_tft->fillRect(zone.x, zone.y, zone.w, zone.h, COLOUR_ALERT);
+		fillcolor= COLOUR_ALERT;
 		break;
 	default:
-		m_tft->fillRect(zone.x, zone.y, zone.w, zone.h, COLOUR_ACTIVE);
+		fillcolor= COLOUR_ACTIVE;
 	}
+
+	m_tft->fillRect(zone.x+1, zone.y+1, zone.w-2, zone.h-2, fillcolor);
 	m_tft->drawRect(zone.x, zone.y, zone.w, zone.h, color);
 
 	m_tft->setCursor(zone.x + zone.w / 2, zone.y + zone.h / 2);
@@ -51,4 +55,3 @@ void MonitorScreen::refresh(ZoneInfo zoneInfo) {
 
 	drawRooms(zoneInfo);
 }
-
