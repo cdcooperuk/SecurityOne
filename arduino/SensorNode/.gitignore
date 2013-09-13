@@ -1,5 +1,6 @@
 .project
 .cproject
+.settings
 Release
 /Release
 /RF24

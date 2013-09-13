@@ -5,10 +5,11 @@
  *      Author: colin
  */
 
-#ifndef SCREEN_H_
-#define SCREEN_H_
+#ifndef __SCREEN_H__
+#define __SCREEN_H__
 #include <TFT.h>
 #include "ZoneInfo.h"
+#include "Status.h"
 
 class Screen {
 public:
@@ -17,10 +18,10 @@ public:
 
 	void clear();
 
-	virtual void refresh(ZoneInfo zoneInfo) = 0;
+	virtual void refresh(ZoneInfo zoneInfo, struct Status status) = 0;
 
 protected:
 	 Adafruit_ST7735 *m_tft;
 };
 
-#endif /* SCREEN_H_ */
+#endif /* __SCREEN_H__ */

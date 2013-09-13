@@ -5,8 +5,8 @@
  *      Author: colin
  */
 
-#ifndef ZONEINFO_H_
-#define ZONEINFO_H_
+#ifndef __ZONEINFO_H__
+#define __ZONEINFO_H__
 
 #include <stdint.h>
 
@@ -30,4 +30,4 @@ private:
 
 };
 
-#endif /* ZONEINFO_H_ */
+#endif /* __ZONEINFO_H__ */

@@ -1,7 +1,7 @@
 
 
-#ifndef DEBUG_H_
-#define DEBUG_H_
+#ifndef __DEBUG_H_
+#define __DEBUG_H_
 
 #undef DO_DEBUG
 #ifdef DO_DEBUG
@@ -11,4 +11,4 @@
 #endif
 
 
-#endif /* DEBUG_H_*/
+#endif /* __DEBUG_H_*/

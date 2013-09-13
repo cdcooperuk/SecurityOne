@@ -4,9 +4,8 @@
  *  Created on: 10 Sep 2013
  *      Author: colin
  */
-
-#ifndef MONITORSCREEN_H_
-#define MONITORSCREEN_H_
+#ifndef __MONITORSCREEN_H__
+#define __MONITORSCREEN_H__
 
 #include "Screen.h"
 #include "ZoneInfo.h"
@@ -23,10 +22,11 @@ public:
 	MonitorScreen(TFT *tft);
 	virtual ~MonitorScreen();
 
-	void refresh(ZoneInfo zoneInfo);
+	void refresh(ZoneInfo zoneInfo, struct Status status);
 private:
 	void drawRooms(ZoneInfo zoneInfo);
 	void drawRoom(int i,Zone zone, uint16_t color);
+	void drawFluff();
 };
 
-#endif /* MONITORSCREEN_H_ */
+#endif /* __MONITORSCREEN_H__ */
