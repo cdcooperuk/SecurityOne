@@ -18,7 +18,7 @@ public:
 
 	void clear();
 
-	virtual void refresh(ZoneInfo zoneInfo, struct Status status) = 0;
+	virtual void refresh(ZoneInfo *zoneInfo, struct Status *status) = 0;
 
 protected:
 	 Adafruit_ST7735 *m_tft;

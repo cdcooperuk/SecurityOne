@@ -3,7 +3,7 @@
 
 struct Status {
 	bool ok = true;
-	char * error = "ok";
+	char error[32] = "ok";
 };
 
 #endif /* __STATUS_H__ */

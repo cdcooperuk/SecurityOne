@@ -18,7 +18,7 @@ public:
 	StatusScreen(TFT *tft);
 	virtual ~StatusScreen();
 
-	void refresh(ZoneInfo zoneInfo, struct Status status);
+	void refresh(ZoneInfo *zoneInfo, struct Status *status);
 private:
 };
 

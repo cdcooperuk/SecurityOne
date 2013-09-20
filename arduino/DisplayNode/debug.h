@@ -1,14 +1,21 @@
 
-
 #ifndef __DEBUG_H_
 #define __DEBUG_H_
 
-#undef DO_DEBUG
 #ifdef DO_DEBUG
-#define debug(s) Serial.println({s;})
+#define debug(s) {Serial.println(s);}
 #else
 #define debug(x)
 #endif
 
+// optionally print timing info.  Id is for variable uniqueness - a meaningful token name.
+#ifdef DO_TIMING
+#define TIMEIT(id,clause) \
+	unsigned long t##id = millis(); \
+	clause \
+	printf(#id"() took %ld ms\n",millis() - t##id );
+#else
+#define TIMEIT(id,clause) clause
+#endif
 
 #endif /* __DEBUG_H_*/

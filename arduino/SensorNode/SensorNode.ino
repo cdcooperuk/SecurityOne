@@ -18,6 +18,8 @@ const int pin_contact2 = NOT_A_PIN;
 const int pin_contact3 = NOT_A_PIN;
 const int pin_pir = 3;
 
+const int RF24_CHANNEL = 0x4c;
+
 RF24 radio(8, 7);
 
 uint8_t myid= EEPROM.read(NODE_ID_EEPROM_ADDRESS);
@@ -57,7 +59,7 @@ void setup() {
 	radio.setRetries(15, 15);
 	radio.setDataRate(RF24_1MBPS);
 	radio.setPALevel(RF24_PA_LOW);
-	radio.setChannel(76);
+	radio.setChannel(RF24_CHANNEL);
 	radio.setCRCLength(RF24_CRC_16);
 	radio.enableDynamicPayloads();
 
@@ -92,6 +94,7 @@ void loop() {
 
 	digitalWrite(pin_led, LOW);
 
+	radio.print_status();
 	// Try again 1s later
 	delay(1000);
 

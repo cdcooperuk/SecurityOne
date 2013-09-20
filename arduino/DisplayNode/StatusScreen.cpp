@@ -19,8 +19,8 @@ StatusScreen::~StatusScreen() {
 	// TODO Auto-generated destructor stub
 }
 
-void StatusScreen::refresh(ZoneInfo zoneInfo, struct Status status) {
+void StatusScreen::refresh(ZoneInfo *zoneInfo, struct Status *status) {
   m_tft->background(COLOUR_BG);
   m_tft->setCursor(0,0);
-  m_tft->println(status.error);
+  m_tft->println(status->error);
 }

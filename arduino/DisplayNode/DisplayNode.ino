@@ -1,25 +1,9 @@
 // Do not remove the include below
+#define __STDC_LIMIT_MACROS
 #include "DisplayNode.h"
 #include "printf.h"
 #include <avr/pgmspace.h>
-
-/***************************************************
- * This is an example sketch for the Adafruit 1.8" SPI display.
- * This library works with the Adafruit 1.8" TFT Breakout w/SD card
- * ----> http://www.adafruit.com/products/358
- * as well as Adafruit raw 1.8" TFT display
- * ----> http://www.adafruit.com/products/618
- *
- * Check out the links above for our tutorials and wiring diagrams
- * These displays use SPI to communicate, 4 or 5 pins are required to
- * interface (RST is optional)
- * Adafruit invests time and resources providing this open source code,
- * please support Adafruit and open-source hardware by purchasing
- * products from Adafruit!
- *
- * Written by Limor Fried/Ladyada for Adafruit Industries.
- * MIT license, all text above must be included in any redistribution
- ****************************************************/
+#include <inttypes.h>
 
 //#define sclk 13
 //#define mosi 11
@@ -35,16 +19,10 @@
 #include "MonitorScreen.h"
 #include "StatusScreen.h"
 #include "ZoneInfo.h"
+#undef DO_DEBUG
 #include "debug.h"
 
-namespace {
-
-const int RF24_CHANNEL = 76;
-
-}
-
-//#include <RF24_config.h>
-//#include <nRF24L01.h>
+const int RF24_CHANNEL = 0x4c;
 
 // Option 1: use any pins but a little slower
 //Adafruit_ST7735 tft = Adafruit_ST7735(cs, dc, mosi, sclk, rst);
@@ -54,8 +32,8 @@ const int RF24_CHANNEL = 76;
 // an output. This is much faster - also required if you want
 // to use the microSD card (see the image drawing example)
 TFT tft = TFT(TFT_CS_PIN, TFT_DC_PIN, TFT_RST_PIN);
-
-const uint64_t my_addr = 0xF0F0F0F080LL;
+const uint64_t my_addr = 0xF0F0F0F087LL;
+//const uint64_t my_addr = 0xf0f0f0f003LL;
 const uint64_t hub_addr = 0xF0F0F0F0D2LL;
 
 RF24 radio(8, 6);
@@ -76,6 +54,7 @@ StatusScreen statusScreen(&tft);
 Screen *currentScreen = &monitorScreen;
 
 void setup(void) {
+	pinMode(10, OUTPUT);
 	Serial.begin(9600);
 	printf_begin();
 
@@ -86,12 +65,15 @@ void setup(void) {
 	currentScreen->clear();
 
 	tft.setTextColor(ST7735_BLACK);
-	tft.print(F("Initializing system"));
+	tft.print(F("Initializing system\n"));
 	if (!initComms()) {
 		status.ok = false;
 		strcpy_P(status.error, PSTR("radio failed"));
+		printf_P(PSTR("radio failed"));
+		printf("\n");
 	}
 	zoneInfo = obtainZoneInfo();
+	zoneInfo.markDirty(true);
 	tft.println(F("\nReady"));
 
 	if (!status.ok) {
@@ -100,19 +82,13 @@ void setup(void) {
 	currentScreen->clear();
 }
 
-void loop() {
-	getInput();
-	updateDisplay();
-	delay(1000);
-}
-
-int freeRam () {
-  extern int __heap_start, *__brkval;
-  int v;
-  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+int freeRam() {
+	extern int __heap_start, *__brkval;
+	int v;
+	return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
 }
 boolean initComms() {
-	tft.println("Initializing radio");
+	tft.println("Initializing radio\n");
 	radio.begin();
 	radio.setRetries(15, 15);
 	radio.setDataRate(RF24_1MBPS);
@@ -120,20 +96,22 @@ boolean initComms() {
 	radio.setChannel(RF24_CHANNEL);
 	radio.setCRCLength(RF24_CRC_16);
 	radio.enableDynamicPayloads();
+	radio.setAutoAck(1);
 
 	printf("opening pipes\n");
 	radio.openReadingPipe(1, my_addr);
 	radio.openWritingPipe(hub_addr);
 
 	radio.startListening();
+
 	Serial.println(freeRam());
 	//
 	// Dump the configuration of the rf unit for debugging
 	//
 	printf("+++ RADIO DETAILS +++\n");
 	radio.printDetails();
-	printf("---------------------\n");
-
+	printf("--- END ---\n");
+	delay(1000);
 	return (radio.getChannel() == RF24_CHANNEL);
 }
 
@@ -141,47 +119,67 @@ ZoneInfo obtainZoneInfo() {
 	ZoneInfo *zi = new ZoneInfo();
 	int nzones = 12;
 	zi->setNumZones(nzones);
-	debug("obtainZoneInfo nzones=");debug(zi->getNumZones());
+	debug("obtainZoneInfo nzones=")
+	debug(zi->getNumZones())
 	zi->zones = (struct Zone*) malloc(sizeof(struct Zone) * nzones);
-	zi->zones[0] = {"BB", 5, 5, 35, 30, false};
-	zi->zones[1] = {"MB", 40, 5, 40, 22, false};
-	zi->zones[2] = {"FB", 5, 35, 35, 35, false};
-	zi->zones[3] = {"H1", 0,0,0,0, true};
-	zi->zones[4] = {"SB", 70, 27, 20, 20, false};
-	zi->zones[5] = {"B1", 40, 50, 30, 15, false};
+	zi->initZone(0, "H1", 0, 0, 0, 0, true);
+	zi->initZone(1, "MB", 40, 5, 40, 22, false);
+	zi->initZone(2, "FB", 5, 35, 35, 35, false);
+	zi->initZone(3, "BB", 5, 5, 35, 30, false);
+	zi->initZone(4, "SB", 70, 27, 20, 20, false);
+	zi->initZone(5, "B1", 40, 50, 30, 15, false);
 
-	zi->zones[6] = {"DR", 5, 85, 35, 30, false};
-	zi->zones[7] = {"KI", 40, 85, 45, 30, false};
-	zi->zones[8] = {"LO", 5, 115, 35, 35, false};
-	zi->zones[9] = {"Hg", 0,0,0,0,true};
-	zi->zones[10] = {"Bg", 55 ,115, 20, 20, false};
-	zi->zones[11] = {"GA", 70, 135, 15, 15,false};
+	zi->initZone(6, "DR", 5, 85, 35, 30, false);
+	zi->initZone(7, "KI", 40, 85, 45, 30, false);
+	zi->initZone(8, "LO", 5, 115, 35, 35, false);
+	zi->initZone(9, "Hg", 0, 0, 0, 0, true);
+	zi->initZone(10, "Bg", 55, 115, 20, 20, false);
+	zi->initZone(11, "GA", 70, 135, 15, 15, false);
 	return *zi;
+}
+
+void loop() {
+	static unsigned long lastStatusPrint = millis();
+	getInput();
+	if (lastStatusPrint + 10000 < millis()) {
+		//radio.print_status();
+		zoneInfo.markDirty(true);
+		lastStatusPrint = millis();
+	}
+	updateDisplay();
+	//	delay(1000);
 }
 
 /**
  * input from user action or radio.
  */
 void getInput() {
-	debug("getInput()");
+	debug("getInput()")
 
 	char receivePayload[32];
+	uint8_t len = 0;
 	uint8_t pipe = 0;
 
-	if (radio.available(&pipe)) {
+	while (radio.available(&pipe)) {
 
-		uint8_t len = radio.getDynamicPayloadSize();
+		len = radio.getDynamicPayloadSize();
 		radio.read(receivePayload, len);
+//		printf("read %d data \n", len);
 		receivePayload[len] = 0; //terminate
-		printf("read %d data \n", len);
-		printf("read '%s'\n", receivePayload);
+		//printf("read %d data \n", len);
+		printf("read from  %" PRIu8 " '%s', RPD=%d \n", pipe, receivePayload,radio.testRPD() );
+
+		// decipher message
+		if (receivePayload[0] == 'S') {
+			uint8_t zone_num, sensor_num, state;
+			char sensor_type;
+			sscanf(receivePayload, "S%hhd %c%hhd %hhd", &zone_num, &sensor_type,
+					&sensor_num, &state);
+			zoneInfo.setZoneStatus(zone_num, sensor_type, sensor_num, state);
+		}
 	}
 }
 
 void updateDisplay() {
-	debug("updateDisplay()...");
-
-	debug("nzones=");debug(zoneInfo.getNumZones());
-	currentScreen->refresh(zoneInfo, status);
-	debug("...updateDisplay()");
+	currentScreen->refresh(&zoneInfo, &status);
 }
