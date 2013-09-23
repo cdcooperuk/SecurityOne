@@ -10,15 +10,15 @@
 
 
 static const char* FMT="[V%02d #%02d A%1d B%1d C%1d P%1d]";
-static uint8_t PROTOCOL_VERSION=2;
 
 RoomState::RoomState(const int nodeId) :
-		protocol_version(PROTOCOL_VERSION), node_id(nodeId), contact1_alert(false), contact2_alert(
-				false), contact3_alert(false), pir_alert(false) {
+		protocol_version(PROTOCOL_VERSION), node_id(nodeId) {
+	contact_alert[0]=false;
+	contact_alert[1]=false;
+	contact_alert[2]=false;
+	pir_alert=false;
 }
-RoomState::RoomState(char* serialized_state) :
-		contact1_alert(false), contact2_alert(false), contact3_alert(false), pir_alert(
-				false) {
+RoomState::RoomState(char* serialized_state) {
 	int pvInt;
 	int nidInt;
 	int c1, c2, c3, p;
@@ -27,9 +27,9 @@ RoomState::RoomState(char* serialized_state) :
 
 	protocol_version = (uint8_t) pvInt;
 	node_id = (uint8_t) nidInt;
-	contact1_alert = c1;
-	contact2_alert = c2;
-	contact3_alert = c3;
+	contact_alert[0] = c1;
+	contact_alert[1] = c2;
+	contact_alert[2] = c3;
 	pir_alert = p;
 }
 
@@ -39,16 +39,12 @@ RoomState::~RoomState() {
 
 char* RoomState::toString(char* buf) {
 	sprintf(buf, FMT, protocol_version, node_id,
-			contact1_alert, contact2_alert, contact3_alert, pir_alert);
+			contact_alert[0], contact_alert[1], contact_alert[2], pir_alert);
 	return buf;
 
 }
 
 bool RoomState::isAlert() {
-	return contact1_alert || contact2_alert || contact3_alert || pir_alert;
+	return contact_alert[0] || contact_alert[1] || contact_alert[2] || pir_alert;
 }
 
-
-uint8_t RoomState::getCurrentProtocolVersion(){
-	return PROTOCOL_VERSION;
-}
