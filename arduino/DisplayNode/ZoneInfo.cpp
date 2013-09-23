@@ -27,7 +27,7 @@ void ZoneInfo::setNumZones(uint8_t n) {
 	m_numzones = n;
 }
 void ZoneInfo::initZone(int zoneNum, const char *name, uint8_t x, uint8_t y,
-		uint8_t w, uint8_t h, bool nodisplay) {
+		uint8_t w, uint8_t h, uint8_t contact_walls, bool nodisplay) {
 
 	struct Zone *z = &zones[zoneNum];
 	strcpy(z->name, name);
@@ -40,6 +40,7 @@ void ZoneInfo::initZone(int zoneNum, const char *name, uint8_t x, uint8_t y,
 	z->contact_alert[2] = false;
 	z->pir_alert = false;
 	z->nodisplay = nodisplay;
+	z->contact_walls = contact_walls;
 }
 
 void ZoneInfo::setZoneStatus(uint8_t zone_num, char sensor_type,

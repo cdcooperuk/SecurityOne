@@ -20,6 +20,7 @@
 #include "Screen.h"
 #include "MonitorScreen.h"
 #include "StatusScreen.h"
+#include "Status.h"
 #include "ZoneInfo.h"
 #undef DO_DEBUG
 #include "debug.h"
@@ -50,7 +51,7 @@ void handleKeyInput();
 void getRadioInput();
 void updateDisplay();
 
-struct Status status { true, "ok" };
+struct Status status ;
 
 MonitorScreen monitorScreen(&tft);
 StatusScreen statusScreen(&tft);
@@ -133,19 +134,19 @@ ZoneInfo obtainZoneInfo() {
 	debug("obtainZoneInfo nzones=")
 	debug(zi->getNumZones())
 	zi->zones = (struct Zone*) malloc(sizeof(struct Zone) * nzones);
-	zi->initZone(0, "H1", 0, 0, 0, 0, true);
-	zi->initZone(1, "MB", 40, 5, 40, 22, false);
-	zi->initZone(2, "FB", 5, 35, 35, 35, false);
-	zi->initZone(3, "BB", 5, 5, 35, 30, false);
-	zi->initZone(4, "SB", 70, 27, 20, 20, false);
-	zi->initZone(5, "B1", 40, 50, 30, 15, false);
+	zi->initZone(0, "H1", 0, 0, 0, 0, 0, true);
+	zi->initZone(1, "MB", 40, 5, 40, 22, WALL_TOP, false);
+	zi->initZone(2, "FB", 5, 35, 35, 35, WALL_BOTTOM, false);
+	zi->initZone(3, "BB", 5, 5, 35, 30, WALL_TOP, false);
+	zi->initZone(4, "SB", 70, 27, 20, 20, WALL_BOTTOM, false);
+	zi->initZone(5, "B1", 40, 50, 30, 15, WALL_BOTTOM, false);
 
-	zi->initZone(6, "DR", 5, 85, 35, 30, false);
-	zi->initZone(7, "KI", 40, 85, 45, 30, false);
-	zi->initZone(8, "LO", 5, 115, 35, 35, false);
-	zi->initZone(9, "Hg", 0, 0, 0, 0, true);
-	zi->initZone(10, "Bg", 55, 115, 20, 20, false);
-	zi->initZone(11, "GA", 70, 135, 15, 15, false);
+	zi->initZone(6, "DR", 5, 85, 35, 30, WALL_TOP, false);
+	zi->initZone(7, "KI", 40, 85, 45, 30, WALL_TOP, false);
+	zi->initZone(8, "LO", 5, 115, 35, 35, WALL_BOTTOM, false);
+	zi->initZone(9, "Hg", 0, 0, 0, 0, 0, true);
+	zi->initZone(10, "Bg", 55, 115, 20, 20, 0, false);
+	zi->initZone(11, "GA", 70, 135, 15, 15, WALL_BOTTOM, false);
 	return *zi;
 }
 
@@ -177,7 +178,7 @@ void handleKeyInput() {
 	debug("getInput()")
 	int modePinPressed = (digitalRead(MODE_PIN) == 0);
 	debug("modePinPressed=")
-	debug(modePinPressed); debug("\n");
+	debug(modePinPressed);debug("\n");
 	if (modePinPressed)
 		toggleScreen();
 }

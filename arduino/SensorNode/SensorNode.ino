@@ -55,7 +55,7 @@ void setup() {
 	init_input_pullup(pin_pir);
 
 	printf("Sensor: %i\n\r", roomState.node_id);
-	printf("PROTOCOL_VERSION: %i\n\r", RoomState::getCurrentProtocolVersion());
+	printf("PROTOCOL_VERSION: %i\n\r", PROTOCOL_VERSION);
 
 	Serial.println("Initializing radio");
 	radio.begin();
@@ -80,9 +80,9 @@ void loop() {
 
 	// check inputs contact -- rely on NOT_A_PIN returning 0
 
-	roomState.contact1_alert = isPin(pin_contact1) && digitalRead(pin_contact1);
-	roomState.contact2_alert = isPin(pin_contact2) && digitalRead(pin_contact2);
-	roomState.contact3_alert = isPin(pin_contact3) && digitalRead(pin_contact3);
+	roomState.contact_alert[0] = isPin(pin_contact1) && digitalRead(pin_contact1);
+	roomState.contact_alert[1] = isPin(pin_contact2) && digitalRead(pin_contact2);
+	roomState.contact_alert[2] = isPin(pin_contact3) && digitalRead(pin_contact3);
 	roomState.pir_alert = isPin(pin_pir) && digitalRead(pin_pir);
 
 	char s[30];
