@@ -13,6 +13,8 @@
 #include <TFT.h>
 #include <SPI.h>
 
+#define MODE_PIN   2
+
 #include <RF24.h>
 
 #include "Screen.h"
@@ -40,13 +42,15 @@ RF24 radio(8, 6);
 
 ZoneInfo zoneInfo;
 
-boolean initComms();
+void initKeys();
+boolean initRadio();
 ZoneInfo obtainZoneInfo();
 
-void getInput();
+void handleKeyInput();
+void getRadioInput();
 void updateDisplay();
 
-struct Status status;
+struct Status status { true, "ok" };
 
 MonitorScreen monitorScreen(&tft);
 StatusScreen statusScreen(&tft);
@@ -58,6 +62,8 @@ void setup(void) {
 	Serial.begin(9600);
 	printf_begin();
 
+	initKeys();
+
 	tft.initR(INITR_BLACKTAB);   // initialize a ST7735S chip, black tab
 
 	//tft.setRotation(2);
@@ -66,7 +72,7 @@ void setup(void) {
 
 	tft.setTextColor(ST7735_BLACK);
 	tft.print(F("Initializing system\n"));
-	if (!initComms()) {
+	if (!initRadio()) {
 		status.ok = false;
 		strcpy_P(status.error, PSTR("radio failed"));
 		printf_P(PSTR("radio failed"));
@@ -87,7 +93,12 @@ int freeRam() {
 	int v;
 	return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
 }
-boolean initComms() {
+
+void initKeys() {
+	pinMode(MODE_PIN, INPUT_PULLUP);
+}
+
+boolean initRadio() {
 	tft.println("Initializing radio\n");
 	radio.begin();
 	radio.setRetries(15, 15);
@@ -140,7 +151,8 @@ ZoneInfo obtainZoneInfo() {
 
 void loop() {
 	static unsigned long lastStatusPrint = millis();
-	getInput();
+	handleKeyInput();
+	getRadioInput();
 	if (lastStatusPrint + 10000 < millis()) {
 		//radio.print_status();
 		zoneInfo.markDirty(true);
@@ -150,10 +162,29 @@ void loop() {
 	//	delay(1000);
 }
 
+void toggleScreen() {
+	if (currentScreen == &statusScreen)
+		currentScreen = &monitorScreen;
+	else
+		currentScreen = &statusScreen;
+	tft.background(COLOUR_BG);
+	delay(50); //debounce
+}
 /**
  * input from user action or radio.
  */
-void getInput() {
+void handleKeyInput() {
+	debug("getInput()")
+	int modePinPressed = (digitalRead(MODE_PIN) == 0);
+	debug("modePinPressed=")
+	debug(modePinPressed); debug("\n");
+	if (modePinPressed)
+		toggleScreen();
+}
+/**
+ * input from user action or radio.
+ */
+void getRadioInput() {
 	debug("getInput()")
 
 	char receivePayload[32];
@@ -167,7 +198,7 @@ void getInput() {
 //		printf("read %d data \n", len);
 		receivePayload[len] = 0; //terminate
 		//printf("read %d data \n", len);
-		printf("read from  %" PRIu8 " '%s', RPD=%d \n", pipe, receivePayload,radio.testRPD() );
+		printf("read from  %" PRIu8 " '%s'\n", pipe, receivePayload);
 
 		// decipher message
 		if (receivePayload[0] == 'S') {

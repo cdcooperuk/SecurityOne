@@ -44,15 +44,10 @@ void ZoneInfo::initZone(int zoneNum, const char *name, uint8_t x, uint8_t y,
 
 void ZoneInfo::setZoneStatus(uint8_t zone_num, char sensor_type,
 		uint8_t sensor_num, uint8_t status) {
-//	char buf[32];
-//	Serial.println("in setZoneStatus");
-//	sprintf(buf, "setting %hhd %c%hhd to %hhd\n", zone_num, sensor_type,
-//			sensor_num, status);
-//	Serial.println(buf);
+
 	if (zone_num < 0 || zone_num >= m_numzones)
 		return;
-//	printf("\tin setZoneStatus num=%hhd %c%hhd, %d\n", zone_num, sensor_type,
-//			sensor_num, status);
+
 	bool prev = false;
 	struct Zone *z = &zones[zone_num];
 	switch (sensor_type) {
@@ -62,29 +57,29 @@ void ZoneInfo::setZoneStatus(uint8_t zone_num, char sensor_type,
 		if (status) {
 			printf("\tsetting zone %hhd contact %d to %d\n", zone_num,
 					sensor_num, status);
-			printf("\t\tc1 %d %d \n", z->contact_alert[sensor_num - 1],
-					zones[zone_num].contact_alert[sensor_num - 1]);
 		}
-		break;
 		break;
 	case 'p':
 		prev = z->pir_alert;
 		z->pir_alert = status ? true : false;
 		if (status) {
 			printf("\tsetting zone %hhd pir to %d\n", zone_num, status);
-			printf("\t\tz %d %d \n", z->pir_alert, zones[zone_num].pir_alert);
 		}
 		break;
 	}
 
 	bool changed = (prev != status);
-	m_changed |= changed;
+	z->dirty |= changed;
+	m_dirty |= changed;
 }
 
 bool ZoneInfo::is_dirty() {
-	return m_changed;
+	return m_dirty;
 }
 
 void ZoneInfo::markDirty(bool b) {
-	m_changed = b;
+	m_dirty = b;
+	for (int i = 0; i < m_numzones; i++) {
+		zones[i].dirty = b;
+	}
 }

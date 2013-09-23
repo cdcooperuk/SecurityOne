@@ -16,7 +16,7 @@
 #include <cstdlib>
 #include <iostream>
 #include "RF24.h"
-#include "RoomState.h"
+#include "../SOcommon/RoomState.h"
 #include <time.h>
 
 using namespace std;
@@ -56,7 +56,7 @@ void notifySensorState(const time_t clk, const char *hr_clk,
 
 }
 void setup(void) {
-	printf("PROTOCOL_VERSION: %i\n\r", RoomState::getCurrentProtocolVersion());
+	printf("PROTOCOL_VERSION: %i\n\r", PROTOCOL_VERSION);
 
 	//
 	// Refer to RF24.h or nRF24L01 DS for settings
@@ -119,9 +119,9 @@ void loop(void) {
 //		printf("%d %s node=%d A=%1d B=%1d C=%1d P=%1d\n", clk, hr_clk,
 //				rs.node_id, rs.contact1_alert, rs.contact2_alert,
 //				rs.contact3_alert, rs.pir_alert);
-		notifySensorState(clk, hr_clk, rs.node_id, "c1", rs.contact1_alert);
-		notifySensorState(clk, hr_clk, rs.node_id, "c2", rs.contact2_alert);
-		notifySensorState(clk, hr_clk, rs.node_id, "c3", rs.contact3_alert);
+		notifySensorState(clk, hr_clk, rs.node_id, "c1", rs.contact_alert[0]);
+		notifySensorState(clk, hr_clk, rs.node_id, "c2", rs.contact_alert[1]);
+		notifySensorState(clk, hr_clk, rs.node_id, "c3", rs.contact_alert[2]);
 		notifySensorState(clk, hr_clk, rs.node_id, "p1", rs.pir_alert);
 
 		if (rs.isAlert()) {

@@ -4,4 +4,4 @@ RoomState.*
 *.o
 hub
 Release
-
+make-deploy-run.sh

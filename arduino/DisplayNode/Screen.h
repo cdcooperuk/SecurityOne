@@ -21,7 +21,7 @@ public:
 	virtual void refresh(ZoneInfo *zoneInfo, struct Status *status) = 0;
 
 protected:
-	 Adafruit_ST7735 *m_tft;
+	 TFT *m_tft;
 };
 
 #endif /* __SCREEN_H__ */

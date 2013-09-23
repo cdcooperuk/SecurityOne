@@ -10,8 +10,8 @@
 
 #include "Screen.h"
 
-#define COLOUR_TEXT   0x0000
-#define COLOUR_BG   0xFFFF
+#define COLOUR_TEXT   0xFFFF
+#define COLOUR_BG   0x0000
 
 class StatusScreen: public Screen {
 public:

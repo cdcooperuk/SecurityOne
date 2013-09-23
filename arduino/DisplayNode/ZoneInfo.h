@@ -16,6 +16,7 @@ struct Zone {
 	bool nodisplay;
 	bool contact_alert[3] ;
 	bool pir_alert ;
+	bool dirty;
 };
 
 class ZoneInfo {
@@ -38,7 +39,7 @@ public:
 private:
 	uint8_t m_numzones;
 	char* m_name;
-	bool m_changed =false;
+	bool m_dirty;
 
 };
 

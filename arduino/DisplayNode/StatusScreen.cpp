@@ -20,7 +20,11 @@ StatusScreen::~StatusScreen() {
 }
 
 void StatusScreen::refresh(ZoneInfo *zoneInfo, struct Status *status) {
-  m_tft->background(COLOUR_BG);
-  m_tft->setCursor(0,0);
-  m_tft->println(status->error);
+	m_tft->setCursor(0, 0);
+	m_tft->print("Status=");
+	if (status->ok)
+		m_tft->setTextColor(m_tft->Color565(0, 255, 0));
+	else
+		m_tft->setTextColor(m_tft->Color565(255, 0, 0));
+	m_tft->println(status->error);
 }

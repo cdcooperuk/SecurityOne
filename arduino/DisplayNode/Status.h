@@ -2,8 +2,8 @@
 #define __STATUS_H__
 
 struct Status {
-	bool ok = true;
-	char error[32] = "ok";
+	bool ok ;
+	char error[32] ;
 };
 
 #endif /* __STATUS_H__ */

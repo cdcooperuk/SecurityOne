@@ -1,3 +1,6 @@
+#include <RoomState.h>
+#include <SOCommon.h>
+
 #include <SPI.h>
 
 #include <RF24.h>
