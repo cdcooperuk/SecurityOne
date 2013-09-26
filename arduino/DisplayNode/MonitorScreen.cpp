@@ -24,7 +24,7 @@ void MonitorScreen::drawZones(ZoneInfo zoneInfo) {
 	for (int i = 0; i < zoneInfo.getNumZones(); i++) {
 		struct Zone z = zoneInfo.zones[i];
 		if (z.dirty) {
-			printf("\t%d dirty", i);
+			IF_SERIAL_DEBUG(printf("\t%d dirty ", i))
 			TIMEIT(drawZone, drawZone(i, z, COLOUR_OUTLINE);)
 		}
 	}
@@ -32,7 +32,7 @@ void MonitorScreen::drawZones(ZoneInfo zoneInfo) {
 void MonitorScreen::drawZone(int i, Zone zone, uint16_t color) {
 	//printf("in %d (p=%d) (c1=%d)", i, zone.pir_alert, zone.contact_alert[0]);
 	if (zone.nodisplay) {
-		printf("returning\n");
+		IF_SERIAL_DEBUG(printf("nodisplay\n"))
 		return;
 	}
 
@@ -72,7 +72,6 @@ void MonitorScreen::drawZone(int i, Zone zone, uint16_t color) {
 	m_tft->setTextColor(ST7735_BLACK);
 	//m_tft->print(i, 10);
 	m_tft->print(zone.name);
-	printf("\n");
 	zone.dirty = false;
 }
 

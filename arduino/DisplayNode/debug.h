@@ -8,6 +8,11 @@
 #define debug(x)
 #endif
 
+#ifdef SERIAL_DEBUG
+#define IF_SERIAL_DEBUG(x) ({x;})
+#else
+#define IF_SERIAL_DEBUG(x)
+#endif
 // optionally print timing info.  Id is for variable uniqueness - a meaningful token name.
 #ifdef DO_TIMING
 #define TIMEIT(id,clause) \

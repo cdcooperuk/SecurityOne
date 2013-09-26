@@ -16,16 +16,11 @@
 #include <cstdlib>
 #include <iostream>
 #include "RF24.h"
+#include "../SOcommon/SOCommon.h"
 #include "../SOcommon/RoomState.h"
 #include <time.h>
 
 using namespace std;
-
-// Radio pipe addresses for the 2 nodes to communicate.
-const uint64_t display_addr = 0xF0F0F0F087LL;
-// First pipe is for display, rest are for sensors
-const uint64_t pipes[6] = { display_addr, 0xF0F0F0F001LL, 0xF0F0F0F002LL,
-		0xF0F0F0F003LL, 0xF0F0F0F004, 0xF0F0F0F005 };
 
 
 // CE and CSN pins On header using GPIO numbering (not pin numbers)
@@ -46,7 +41,7 @@ void notifySensorState(const time_t clk, const char *hr_clk,
 	char buf[32];
 
 	sprintf(buf, "S%d %s %1d", node_id, sensor_id, alerted);
-	printf("%d %s %s ", (int) clk, hr_clk, buf);
+	printf("%d %s '%s' [%d]", (int) clk, hr_clk, buf, strlen(buf));
 
 	if (sendToDisplay(buf)) {
 		printf("ok\n");
@@ -66,7 +61,7 @@ void setup(void) {
 	radio.setRetries(15, 15);
 	radio.setDataRate(RF24_1MBPS);
 	radio.setPALevel(RF24_PA_LOW);
-	radio.setChannel(0x4c);
+	radio.setChannel(RF24_CHANNEL);
 	radio.setCRCLength(RF24_CRC_16);
 
 	// Open 6 pipes for readings ( 5 plus pipe0, also can be used for reading )

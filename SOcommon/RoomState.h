@@ -26,6 +26,7 @@ public:
 	uint8_t node_id;
 	bool contact_alert[3];
 	bool pir_alert;
+	int msgId;
 };
 
 #endif /* ROOMSTATE_H_ */

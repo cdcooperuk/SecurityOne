@@ -33,14 +33,14 @@ tester : tester.o
 	$(CXX) ${CCFLAGS} ${headers} -L../../RF24/librf24-rpi/librf24/  -lrf24 tester.o -o tester
 	
 hub.o : hub.cpp ../SOcommon/RoomState.h
-	$(CXX) -c ${CCFLAGS} ${headers}  hub.cpp -o $@
+	$(CXX)  $(CPPFLAGS) -c ${CCFLAGS} ${headers}  hub.cpp -o $@
 
 tester.o : tester.cpp
-	$(CXX) -c ${CCFLAGS} ${headers}  tester.cpp -o $@
+	$(CXX)  $(CPPFLAGS) -c ${CCFLAGS} ${headers}  tester.cpp -o $@
 	
 	
 RoomState.o : ../SOcommon/RoomState.cpp ../SOcommon/RoomState.h
-	$(CXX) -c ${CCFLAGS} ${headers}  ../SOcommon/RoomState.cpp -o $@
+	$(CXX)  $(CPPFLAGS) -c ${CCFLAGS} ${headers}  ../SOcommon/RoomState.cpp -o $@
 	
 clean:
 	rm -rf $(PROGRAMS) RoomState.* hub.o tester.o

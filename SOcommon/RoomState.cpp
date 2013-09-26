@@ -9,7 +9,7 @@
 #include <inttypes.h>
 
 
-static const char* FMT="[V%02d #%02d A%1d B%1d C%1d P%1d]";
+static const char* FMT="[V%02d #%02d A%1d B%1d C%1d P%1d #%d]";
 
 RoomState::RoomState(const int nodeId) :
 		protocol_version(PROTOCOL_VERSION), node_id(nodeId) {
@@ -22,8 +22,9 @@ RoomState::RoomState(char* serialized_state) {
 	int pvInt;
 	int nidInt;
 	int c1, c2, c3, p;
+	int id;
 	sscanf(serialized_state, FMT, &pvInt, &nidInt, &c1,
-			&c2, &c3, &p);
+			&c2, &c3, &p, &id);
 
 	protocol_version = (uint8_t) pvInt;
 	node_id = (uint8_t) nidInt;
@@ -31,6 +32,7 @@ RoomState::RoomState(char* serialized_state) {
 	contact_alert[1] = c2;
 	contact_alert[2] = c3;
 	pir_alert = p;
+	msgId=id;
 }
 
 RoomState::~RoomState() {
@@ -39,7 +41,7 @@ RoomState::~RoomState() {
 
 char* RoomState::toString(char* buf) {
 	sprintf(buf, FMT, protocol_version, node_id,
-			contact_alert[0], contact_alert[1], contact_alert[2], pir_alert);
+			contact_alert[0], contact_alert[1], contact_alert[2], pir_alert, msgId);
 	return buf;
 
 }

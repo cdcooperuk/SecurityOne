@@ -3,5 +3,6 @@
 RoomState.*
 *.o
 hub
+tester
 Release
 make-deploy-run.sh
