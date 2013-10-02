@@ -1,5 +1,5 @@
 #include <RoomState.h>
-#include <SOCommon.h>
+#include <SOcommon.h>
 
 #include <SPI.h>
 
@@ -26,7 +26,7 @@ uint8_t myid= EEPROM.read(NODE_ID_EEPROM_ADDRESS);
 RoomState roomState(myid);
 
 //my address = base + my id
-uint64_t my_addr = base_addr + myid;
+uint64_t my_addr = CFG_BASE_ADDR + myid;
 
 // message counter
 static int msgId;
@@ -57,11 +57,11 @@ void setup() {
 
 	Serial.println("Initializing radio");
 	radio.begin();
-	radio.setRetries(15, 15);
-	radio.setDataRate(RF24_1MBPS);
+	radio.setRetries(0, 15);
+	radio.setDataRate(CFG_RF24_DATA_RATE);
 	radio.setPALevel(RF24_PA_HIGH);
-	radio.setChannel(RF24_CHANNEL);
-	radio.setCRCLength(RF24_CRC_16);
+	radio.setChannel(CFG_RF24_CHANNEL);
+	radio.setCRCLength(CFG_RF24_CRC_LENGTH);
 	radio.enableDynamicPayloads();
 
 	radio.openWritingPipe(my_addr);
@@ -91,7 +91,7 @@ void loop() {
 	bool ok = radio.write(&s, strlen(s), false);
 
 	if (ok)
-		printf("ok...\n");
+		printf("ok...\n\r");
 	else
 		printf("failed.\n\r");
 

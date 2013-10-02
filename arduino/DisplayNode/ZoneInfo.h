@@ -15,18 +15,20 @@
 #define WALL_LEFT 4
 #define WALL_RIGHT 8
 
-struct Zone {
+struct Zone
+{
 	char name[3];
 	uint8_t x, y, w, h;
 	bool nodisplay;
-	bool contact_alert[3] ;
-	bool pir_alert ;
-	bool dirty;
+	volatile bool contact_alert[3];
+	volatile bool pir_alert;
+	volatile bool dirty;
 	// bits indicating which walls have contact sensors
 	uint8_t contact_walls;
 };
 
-class ZoneInfo {
+class ZoneInfo
+{
 public:
 	ZoneInfo();
 	virtual ~ZoneInfo();
@@ -45,8 +47,7 @@ public:
 	struct Zone *zones;
 private:
 	uint8_t m_numzones;
-	char* m_name;
-	bool m_dirty;
+	volatile bool m_dirty;
 
 };
 

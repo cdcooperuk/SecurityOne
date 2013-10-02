@@ -17,9 +17,11 @@ class StatusScreen: public Screen {
 public:
 	StatusScreen(TFT *tft);
 	virtual ~StatusScreen();
+	const char* getName();
 
-	void refresh(ZoneInfo *zoneInfo, struct Status *status);
+	void refresh( ZoneInfo *zoneInfo, const struct Status *status);
 private:
+	 void printZones( ZoneInfo *zoneInfo);
 };
 
 #endif /* __STATUSSCREEN_H__ */

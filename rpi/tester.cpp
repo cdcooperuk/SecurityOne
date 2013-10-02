@@ -16,7 +16,7 @@
 #include <cstdlib>
 #include <iostream>
 #include "RF24.h"
-#include "../SOcommon/SOCommon.h"
+#include "../SOcommon/SOcommon.h"
 
 using namespace std;
 
@@ -45,10 +45,10 @@ void setup(void) {
 	radio.enableDynamicPayloads();
 	radio.setAutoAck(1);
 	radio.setRetries(15, 15);
-	radio.setDataRate(RF24_1MBPS);
+	radio.setDataRate(CFG_RF24_DATA_RATE);
 	radio.setPALevel(RF24_PA_MAX);
-	radio.setChannel(RF24_CHANNEL);
-	radio.setCRCLength(RF24_CRC_16);
+	radio.setChannel(CFG_RF24_CHANNEL);
+	radio.setCRCLength(CFG_RF24_CRC_LENGTH);
 
 	// Open 6 pipes for readings ( 5 plus pipe0, also can be used for reading )
 	radio.openWritingPipe(display_addr);
@@ -60,9 +60,9 @@ void setup(void) {
 	// Start Listening
 	radio.startListening();
 
-	printf("+++ RADIO DETAILS +++\n");
+	printf("+++ RADIO DETAILS +++\n\r");
 	radio.printDetails();
-	printf("---------------------\n");
+	printf("---------------------\n\r");
 	printf("\n\rOutput below : \n\r");
 	usleep(1000);
 }
@@ -80,7 +80,7 @@ void loop(void) {
 			radio.read(receivePayload, len);
 			receivePayload[len] = 0;
 			receivePayload[len] = 0; //terminate
-			printf("read on pipe %d '%s'\n", pipe, receivePayload);
+			printf("read on pipe %d '%s'\n\r", pipe, receivePayload);
 		}
 		sleep(1);
 	}
@@ -89,7 +89,7 @@ void loop(void) {
 	char msg[32];
 	sprintf(msg, "test %d", iter++);
 	bool ok = sendToDisplay(msg);
-	printf(ok ? "ok\n" : "error\n");
+	printf(ok ? "ok\n\r" : "error\n\r");
 }
 
 int main(int argc, char** argv) {
@@ -97,9 +97,9 @@ int main(int argc, char** argv) {
 		if (strcmp("nolisten", argv[1]) == 0)
 			listen = false;
 	if (listen)
-		printf("listening\n");
+		printf("listening\n\r");
 	else
-		printf("not listening\n");
+		printf("not listening\n\r");
 
 	setup();
 	while (1) {

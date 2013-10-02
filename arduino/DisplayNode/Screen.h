@@ -18,7 +18,8 @@ public:
 
 	void clear();
 
-	virtual void refresh(ZoneInfo *zoneInfo, struct Status *status) = 0;
+	virtual void refresh( ZoneInfo *zoneInfo, const struct Status *status) = 0;
+	virtual const char * getName() =0;
 
 protected:
 	 TFT *m_tft;

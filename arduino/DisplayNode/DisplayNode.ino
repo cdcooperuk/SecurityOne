@@ -18,7 +18,7 @@
 
 #include <RF24.h>
 
-#include <SOCommon.h>
+#include <SOcommon.h>
 #include "Screen.h"
 #include "MonitorScreen.h"
 #include "StatusScreen.h"
@@ -37,6 +37,7 @@
 TFT tft = TFT(TFT_CS_PIN, TFT_DC_PIN, TFT_RST_PIN);
 
 RF24 radio(8, 6);
+bool radio_interrupt = false;
 
 ZoneInfo zoneInfo;
 
@@ -47,6 +48,7 @@ ZoneInfo obtainZoneInfo();
 
 void switchScreen(Screen &screen);
 void handleKeyInput();
+void getRadioInput();
 void updateDisplay();
 
 // Interrupt handler, check the radio because we got an IRQ
@@ -58,30 +60,15 @@ MonitorScreen monitorScreen(&tft);
 StatusScreen statusScreen(&tft);
 
 Screen *currentScreen = &monitorScreen;
-volatile int nMsgsReceived = 0;
-
-int freeRam()
-{
-	extern int __heap_start, *__brkval;
-	int v;
-	return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
-}
-
-void printFreeRam()
-{
-	Serial.print("Free RAM=");
-	Serial.println(freeRam());
-}
 
 void setup(void)
 {
+	Serial.begin(115200);
 	//make sure arduino never thinks its a slave
 	pinMode(SS, OUTPUT);
 	digitalWrite(SS, HIGH);
 
 	pinMode(TFT_CS_PIN, OUTPUT);
-	Serial.begin(115200);
-	printf_begin();
 
 	initTFT();
 
@@ -89,13 +76,11 @@ void setup(void)
 
 	tft.print(F("Initializing system\n"));
 	status.ok = true;
-	strncpy(status.error, "OK", 2);
+	strncpy((char*) status.error, "OK", 2);
 	if (!initRadio())
 	{
 		status.ok = false;
-		strcpy_P(status.error, PSTR("radio failed"));
-		printf_P(PSTR("radio failed"));
-		printf("\n");
+		strcpy_P((char*) status.error, PSTR("radio failed"));
 	}
 	zoneInfo = obtainZoneInfo();
 	zoneInfo.markDirty(true);
@@ -120,6 +105,7 @@ void switchScreen(Screen &screen)
 {
 	currentScreen = &screen;
 	currentScreen->clear();
+	zoneInfo.markDirty(true);
 }
 
 void initKeys()
@@ -138,31 +124,27 @@ boolean initRadio()
 {
 	tft.println("Initializing radio\n");
 	radio.begin();
-	radio.setDataRate(RF24_1MBPS);
+	radio.setDataRate(CFG_RF24_DATA_RATE);
 	radio.setPALevel(RF24_PA_HIGH);
-	radio.setChannel(RF24_CHANNEL);
-	radio.setCRCLength(RF24_CRC_16);
+	radio.setChannel(CFG_RF24_CHANNEL);
+	radio.setCRCLength(CFG_RF24_CRC_LENGTH);
 	radio.enableDynamicPayloads();
 	radio.setAutoAck(true);
 	radio.powerUp();
 
-	printf("opening pipes\n");
 	radio.openReadingPipe(1, display_addr);
 //	radio.openReadingPipe(1, 0xF0F0F0F0E1LL);
 	//radio.openWritingPipe(hub_addr);
 
-	printFreeRam();
 	//
 	// Dump the configuration of the rf unit for debugging
 	//
-	printf("+++ RADIO DETAILS +++\n");
 	radio.printDetails();
-	printf("--- END ---\n");
 
 	//RF24 interrupt
 	pinMode(3, INPUT);
 
-	return (radio.getChannel() == RF24_CHANNEL);
+	return (radio.getChannel() == CFG_RF24_CHANNEL);
 }
 
 ZoneInfo obtainZoneInfo()
@@ -172,7 +154,6 @@ ZoneInfo obtainZoneInfo()
 	zi->setNumZones(nzones);
 	debug("obtainZoneInfo nzones=")
 	debug(zi->getNumZones())
-	zi->zones = (struct Zone*) malloc(sizeof(struct Zone) * nzones);
 	zi->initZone(0, "H1", 0, 0, 0, 0, 0, true);
 	zi->initZone(1, "MB", 40, 5, 40, 22, WALL_TOP, false);
 	zi->initZone(2, "FB", 5, 35, 35, 35, WALL_BOTTOM, false);
@@ -188,31 +169,36 @@ ZoneInfo obtainZoneInfo()
 	zi->initZone(11, "GA", 70, 135, 15, 15, WALL_BOTTOM, false);
 	return *zi;
 }
+void periodic_stuff()
+{
+
+}
 
 void loop()
 {
 	static unsigned long lastStatusPrint = millis();
 	handleKeyInput();
-//	getRadioInput();
-	if (lastStatusPrint + 10000 < millis())
+	getRadioInput();
+	if (lastStatusPrint + 1000 < millis())
 	{
-		//radio.print_status();
-		zoneInfo.markDirty(true);
+		periodic_stuff();
 		lastStatusPrint = millis();
-		printf("nMsgsReceived=%d\n", nMsgsReceived);
-		radio.print_status();
 	}
 	updateDisplay();
-	delay(1000);
+
 }
 
 void toggleScreen()
 {
 	Screen *s;
 	if (currentScreen == &statusScreen)
+	{
 		s = &monitorScreen;
+	}
 	else
+	{
 		s = &statusScreen;
+	}
 	switchScreen(*s);
 }
 /**
@@ -223,88 +209,78 @@ void handleKeyInput()
 	debug("getInput()")
 	int modePinPressed = (digitalRead(MODE_PIN) == 0);
 	debug("modePinPressed=")
-	debug(modePinPressed);debug("\n");
+	debug(modePinPressed);debug("\n\r");
 	if (modePinPressed)
+	{
 		toggleScreen();
-	delay(50); //debounce
+		delay(50); //debounce
+	}
 }
 
-volatile char message[32];
-
-void dataReadyHandler(const uint8_t status)
+void dataReadyHandler(const uint8_t rf24_status)
 {
-	//printf("\t\tdataReadyHandler(%02x)\n", status);
-	printFreeRam();
-	//printf("Received something\n\r");
 	char receivePayload[32];
 	bool isFIFOEmpty = false; // or we wouldn't be here
 	do
 	{
 		uint8_t len = 0;
-		nMsgsReceived++;
+		status.nMsgsReceived++;
 		len = radio.getDynamicPayloadSize();
-		if (len != 7)
+		if (len > 32)
 		{
-			//printf("bad packet (len!=7)\n");
+			status.nMsgsDiscarded++;
 			radio.flush_rx();
-			message[0]=0;
+			receivePayload[0] = 0;
 			return;
 		}
 		else
 		{
 			isFIFOEmpty = radio.read(receivePayload, len);
 			receivePayload[len] = 0; //terminate
-			//printf("read from  %" PRIu8 " '%s'\n", pipe_num, receivePayload);
-			//printf("\t\t\tread something, len=%hhd\n", len);
-			strcpy((char*)message,receivePayload);
-			//printf("\t\tisFIFOEmpty=%d\n", isFIFOEmpty);
-			//printf("read '%s'\n", receivePayload);
-//			printf("%c\n", receivePayload[0]);
-//			printf("%c\n", receivePayload[1]);
-//			printf("%c\n", receivePayload[2]);
-//			printf("%x\n", receivePayload[3]);
-//			printf("%c\n",receivePayload[4]);
-//			printf("%c\n",receivePayload[5]);
-//			printf("%c\n",receivePayload[6]);
 
 			// decipher message
 			if (receivePayload[0] == 'S')
 			{
 				uint8_t zone_num, sensor_num, state;
 				char sensor_type;
-//				sscanf(receivePayload, "S%d %c%d %01d", &zone_num,
-//						&sensor_type, &sensor_num, &state);
-				zone_num=receivePayload[1]-'0';
-				sensor_type=receivePayload[3];
-				sensor_num=receivePayload[4]-'0';
-				state=receivePayload[6]-'0';
-				printf("setzone %d %c%d %01d\n", zone_num, sensor_type, sensor_num, state);
-//				zoneInfo.setZoneStatus(zone_num, sensor_type, sensor_num,
-//						state);
+				zone_num = receivePayload[1] - '0';
+				sensor_type = receivePayload[3];
+				sensor_num = receivePayload[4] - '0';
+				state = receivePayload[6] - '0';
+				zoneInfo.setZoneStatus(zone_num, sensor_type, sensor_num,
+						state);
 			}
 		}
 	} while (!isFIFOEmpty);
 
 }
-void dataSentHandler(const uint8_t status)
+void dataSentHandler(const uint8_t rf24_status)
 {
-	printf("\t\tdataSentHandler(%02x)\n", status);
+	printf("TODO: dataSentHandler(%02x)\n\r", rf24_status);
 }
-void maxRetransmitsHandler(const uint8_t status)
+void maxRetransmitsHandler(const uint8_t rf24_status)
 {
-	printf("\t\tmaxRetransmitsHandler(%02x)\n", status);
+	printf("TODO: maxRetransmitsHandler(%02x)\n\r", rf24_status);
 }
 void check_radio(void)
 {
-	printf("\tin check_radio\n");
-
-	radio.dispatchAndClearInterrupts(dataReadyHandler, dataSentHandler,
-			maxRetransmitsHandler);
+	radio_interrupt = true;
 }
 
+void getRadioInput()
+{
+	if (radio_interrupt)
+	{
+		radio.dispatchAndClearInterrupts(dataReadyHandler, dataSentHandler,
+				maxRetransmitsHandler);
+
+		radio_interrupt = false;
+	}
+}
 void updateDisplay()
 {
-
+	//noInterrupts();
 	currentScreen->refresh(&zoneInfo, &status);
+	//interrupts();
 
 }

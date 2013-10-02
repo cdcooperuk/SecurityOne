@@ -18,9 +18,11 @@
 #define TIMEIT(id,clause) \
 	unsigned long t##id = millis(); \
 	clause \
-	printf(#id"() took %ld ms\n",millis() - t##id );
+	printf(#id"() took %ld ms\n\r",millis() - t##id );
 #else
 #define TIMEIT(id,clause) clause
 #endif
+
+
 
 #endif /* __DEBUG_H_*/

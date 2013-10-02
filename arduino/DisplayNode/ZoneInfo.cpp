@@ -11,8 +11,9 @@
 #include <HardwareSerial.h>
 
 ZoneInfo::ZoneInfo() {
-	// TODO Auto-generated constructor stub
-
+	m_numzones=0;
+	m_dirty=false;
+	zones=NULL;
 }
 
 ZoneInfo::~ZoneInfo() {
@@ -25,6 +26,7 @@ uint8_t ZoneInfo::getNumZones() {
 
 void ZoneInfo::setNumZones(uint8_t n) {
 	m_numzones = n;
+	zones = (struct Zone*) malloc(sizeof(struct Zone) * n);
 }
 void ZoneInfo::initZone(int zoneNum, const char *name, uint8_t x, uint8_t y,
 		uint8_t w, uint8_t h, uint8_t contact_walls, bool nodisplay) {
@@ -55,17 +57,10 @@ void ZoneInfo::setZoneStatus(uint8_t zone_num, char sensor_type,
 	case 'c':
 		prev = z->contact_alert[sensor_num - 1];
 		z->contact_alert[sensor_num - 1] = status ? true : false;
-		if (status) {
-			printf("\tsetting zone %hhd contact %d to %d\n", zone_num,
-					sensor_num, status);
-		}
 		break;
 	case 'p':
 		prev = z->pir_alert;
 		z->pir_alert = status ? true : false;
-		if (status) {
-			printf("\tsetting zone %hhd pir to %d\n", zone_num, status);
-		}
 		break;
 	}
 

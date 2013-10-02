@@ -4,3 +4,5 @@ Release
 /Release
 /RF24
 /SPI
+/.dep
+/.lib
