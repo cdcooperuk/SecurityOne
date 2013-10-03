@@ -22,12 +22,15 @@
 
 using namespace std;
 
+const int MAX_MSGS = 4;
+const int OUT_MSG_LEN = 32;
+
 // CE and CSN pins On header using GPIO numbering (not pin numbers)
 RF24 radio("/dev/spidev0.0", 8000000, 25);  // Setup for GPIO 25 CE
 
-bool sendToDisplay(const char *buf)
+bool sendToDisplay(char buf[][OUT_MSG_LEN], const int nMsgs)
 {
-	bool sentOk;
+	bool allSentOk = true;
 
 	time_t clk = time(NULL);
 	char *hr_clk = ctime(&clk);
@@ -35,47 +38,61 @@ bool sendToDisplay(const char *buf)
 	int l = strlen(hr_clk);
 	hr_clk[l - 1] = '\0';
 
-	printf("%d %s '%s' [%d]", (int) clk, hr_clk, buf, strlen(buf));
-
 	radio.stopListening();
-	sentOk = radio.write(buf, strlen(buf));
+
+	for (int i = 0; i < nMsgs; i++)
+	{
+		int len = strlen(buf[i]);
+		printf("%d %s '%s' [%d]", (int) clk, hr_clk, buf[i], len);
+
+		bool thisMsgOk = radio.write(buf[i], len);
+		allSentOk &= thisMsgOk;
+		if (thisMsgOk)
+		{
+			printf("ok\n\r");
+		}
+		else
+		{
+			printf("send error\n\r");
+		}
+	}
+
 	radio.startListening();
 
-	return sentOk;
+	return allSentOk;
 }
-void notifySensorState(const uint8_t node_id, const char* sensor_id,
-		const bool alerted)
+/**
+ * degenerate case for single message
+ */
+bool sendToDisplay(char s[])
 {
+	char buf[1][OUT_MSG_LEN];
+	strcpy(buf[0],s);
 
-	char buf[32];
-	sprintf(buf, "S%d %s %1d", node_id, sensor_id, alerted);
-
-	if (sendToDisplay(buf))
-	{
-		printf("ok\n\r");
-	}
-	else
-	{
-		printf("send error\n\r");
-	}
-
+	return sendToDisplay(buf,1);
 }
+void prepareSensorStateMessage(char *buf, const uint8_t node_id,
+		const char* sensor_id, const bool alerted)
+{
+	sprintf(buf, "S%d %s %1d", node_id, sensor_id, alerted);
+}
+
 void setup(void)
 {
 	printf("PROTOCOL_VERSION: %i\n\r", PROTOCOL_VERSION);
 
-	//
-	// Refer to RF24.h or nRF24L01 DS for settings
+//
+// Refer to RF24.h or nRF24L01 DS for settings
 	radio.begin();
 	radio.enableDynamicPayloads();
 	radio.setAutoAck(1);
-	radio.setRetries(0, 15);
+	radio.setRetries(3, 15);
 	radio.setDataRate(CFG_RF24_DATA_RATE);
-	radio.setPALevel(RF24_PA_LOW);
+	radio.setPALevel(RF24_PA_HIGH);
 	radio.setChannel(CFG_RF24_CHANNEL);
 	radio.setCRCLength(CFG_RF24_CRC_LENGTH);
 
-	// Open 6 pipes for readings ( 5 plus pipe0, also can be used for reading )
+// Open 6 pipes for readings ( 5 plus pipe0, also can be used for reading )
 	radio.openWritingPipe(display_addr);
 	radio.openReadingPipe(1, pipes[1]);
 	radio.openReadingPipe(2, pipes[2]);
@@ -83,11 +100,11 @@ void setup(void)
 	radio.openReadingPipe(4, pipes[4]);
 	radio.openReadingPipe(5, pipes[5]);
 
-	//
-	// Dump the configuration of the rf unit for debugging
-	//
+//
+// Dump the configuration of the rf unit for debugging
+//
 
-	// Start Listening
+// Start Listening
 	radio.startListening();
 
 	printf("+++ RADIO DETAILS +++\n\r");
@@ -102,7 +119,7 @@ void loop(void)
 	char receivePayload[32];
 	uint8_t pipe = 0;
 
-	//IF_SERIAL_DEBUG(printf("in loop\n"));
+//IF_SERIAL_DEBUG(printf("in loop\n"));
 	while (radio.available(&pipe))
 	{
 
@@ -122,10 +139,18 @@ void loop(void)
 //		printf("%d %s node=%d A=%1d B=%1d C=%1d P=%1d\n", clk, hr_clk,
 //				rs.node_id, rs.contact1_alert, rs.contact2_alert,
 //				rs.contact3_alert, rs.pir_alert);
-		notifySensorState(rs.node_id, "c1", rs.contact_alert[0]);
-		notifySensorState(rs.node_id, "c2", rs.contact_alert[1]);
-		notifySensorState(rs.node_id, "c3", rs.contact_alert[2]);
-		notifySensorState(rs.node_id, "p1", rs.pir_alert);
+
+		char buf[MAX_MSGS][OUT_MSG_LEN];
+		int bufIndex = 0;
+		prepareSensorStateMessage(buf[bufIndex++], rs.node_id, "c1",
+				rs.contact_alert[0]);
+		prepareSensorStateMessage(buf[bufIndex++], rs.node_id, "c2",
+				rs.contact_alert[1]);
+		prepareSensorStateMessage(buf[bufIndex++], rs.node_id, "c3",
+				rs.contact_alert[2]);
+		prepareSensorStateMessage(buf[bufIndex++], rs.node_id, "p1",
+				rs.pir_alert);
+		sendToDisplay(buf, bufIndex);
 
 		if (rs.isAlert())
 		{
