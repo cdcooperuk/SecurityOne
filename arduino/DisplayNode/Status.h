@@ -4,7 +4,7 @@
 struct Status
 {
 	volatile bool ok;
-	char error[32];
+	char status_text[32];
 	volatile int nMsgsReceived;
 	volatile int nMsgsDiscarded;
 };

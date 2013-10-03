@@ -25,6 +25,7 @@
 #include "Status.h"
 #include "ZoneInfo.h"
 #undef DO_DEBUG
+#define DO_TIMING
 #include "debug.h"
 
 // Option 1: use any pins but a little slower
@@ -60,10 +61,13 @@ MonitorScreen monitorScreen(&tft);
 StatusScreen statusScreen(&tft);
 
 Screen *currentScreen = &monitorScreen;
+volatile char heartbeatSymbol = '-';
 
 void setup(void)
 {
 	Serial.begin(115200);
+	printf_begin();
+
 	//make sure arduino never thinks its a slave
 	pinMode(SS, OUTPUT);
 	digitalWrite(SS, HIGH);
@@ -76,11 +80,11 @@ void setup(void)
 
 	tft.print(F("Initializing system\n"));
 	status.ok = true;
-	strncpy((char*) status.error, "OK", 2);
+	strncpy((char*) status.status_text, "OK", 2);
 	if (!initRadio())
 	{
 		status.ok = false;
-		strcpy_P((char*) status.error, PSTR("radio failed"));
+		strcpy_P((char*) status.status_text, PSTR("radio failed"));
 	}
 	zoneInfo = obtainZoneInfo();
 	zoneInfo.markDirty(true);
@@ -174,20 +178,6 @@ void periodic_stuff()
 
 }
 
-void loop()
-{
-	static unsigned long lastStatusPrint = millis();
-	handleKeyInput();
-	getRadioInput();
-	if (lastStatusPrint + 1000 < millis())
-	{
-		periodic_stuff();
-		lastStatusPrint = millis();
-	}
-	updateDisplay();
-
-}
-
 void toggleScreen()
 {
 	Screen *s;
@@ -217,6 +207,14 @@ void handleKeyInput()
 	}
 }
 
+void handleHeartBeat(char *message)
+{
+	if (heartbeatSymbol == 'x')
+		heartbeatSymbol = '+';
+	else
+		heartbeatSymbol = 'x';
+}
+
 void dataReadyHandler(const uint8_t rf24_status)
 {
 	char receivePayload[32];
@@ -243,12 +241,18 @@ void dataReadyHandler(const uint8_t rf24_status)
 			{
 				uint8_t zone_num, sensor_num, state;
 				char sensor_type;
-				zone_num = receivePayload[1] - '0';
-				sensor_type = receivePayload[3];
-				sensor_num = receivePayload[4] - '0';
-				state = receivePayload[6] - '0';
+				sscanf(receivePayload, "S%hhd %c%hhd %hhd", &zone_num,
+						&sensor_type, &sensor_num, &state);
+//				zone_num = receivePayload[1] - '0';
+//				sensor_type = receivePayload[3];
+//				sensor_num = receivePayload[4] - '0';
+//				state = receivePayload[6] - '0';
 				zoneInfo.setZoneStatus(zone_num, sensor_type, sensor_num,
 						state);
+			}
+			else if (receivePayload[0] == 'H')
+			{
+				handleHeartBeat(receivePayload);
 			}
 		}
 	} while (!isFIFOEmpty);
@@ -279,8 +283,25 @@ void getRadioInput()
 }
 void updateDisplay()
 {
-	//noInterrupts();
+//noInterrupts();
 	currentScreen->refresh(&zoneInfo, &status);
-	//interrupts();
+	tft.setCursor(0, 0);
+	tft.setTextColor(ST7735_YELLOW, ST7735_BLACK);
+	tft.print(heartbeatSymbol);
+//interrupts();
+
+}
+
+void loop()
+{
+	static unsigned long lastStatusPrint = millis();
+	TIMEIT(handleKeyInput, handleKeyInput());
+	TIMEIT(getRadioInput, getRadioInput());
+	if (lastStatusPrint + 1000 < millis())
+	{
+		periodic_stuff();
+		lastStatusPrint = millis();
+	}
+	TIMEIT(updateDisplay, updateDisplay());
 
 }

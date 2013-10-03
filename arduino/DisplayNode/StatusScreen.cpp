@@ -23,18 +23,22 @@ StatusScreen::~StatusScreen()
 
 void StatusScreen::printZones(ZoneInfo *zoneInfo)
 {
+
 	for (int i = 0; i < zoneInfo->getNumZones(); i++)
 	{
 		struct Zone z = zoneInfo->zones[i];
 //		m_tft->setCursor(0, startY + (i * 8));
 
-		m_tft->setTextColor(ST7735_WHITE,ST7735_BLACK );
-		m_tft->print(z.name);
-		m_tft->print(" ");
-		m_tft->print(z.contact_alert[0] ? "1" : " ");
-		m_tft->print(z.contact_alert[1] ? "2" : " ");
-		m_tft->print(z.contact_alert[2] ? "3" : " ");
-		m_tft->print(z.pir_alert ? "P" : " ");
+		if (z.dirty)
+		{
+			m_tft->setTextColor(ST7735_WHITE, ST7735_BLACK);
+			m_tft->print(z.name);
+			m_tft->print(" ");
+			m_tft->print(z.contact_alert[0] ? "1" : " ");
+			m_tft->print(z.contact_alert[1] ? "2" : " ");
+			m_tft->print(z.contact_alert[2] ? "3" : " ");
+			m_tft->print(z.pir_alert ? "P" : " ");
+		}
 		m_tft->println();
 	}
 
@@ -46,20 +50,26 @@ void StatusScreen::refresh(ZoneInfo *zoneInfo, const struct Status *status)
 	m_tft->setCursor(xoffsetToCenter, 0);
 	m_tft->setTextColor(ST7735_WHITE);
 	m_tft->println("STATUS");
-	m_tft->setCursor(0, 30);
+	m_tft->println();
 	m_tft->print("Status=");
 	if (status->ok)
 		m_tft->setTextColor(m_tft->Color565(0, 255, 0));
 	else
 		m_tft->setTextColor(m_tft->Color565(255, 0, 0));
-	m_tft->println(status->error);
+	m_tft->println(status->status_text);
 
-	m_tft->setTextColor(ST7735_WHITE , ST7735_BLACK);
+	m_tft->setTextColor(ST7735_WHITE, ST7735_BLACK);
 	char buf[32];
-	sprintf(buf,"recvd=%d, bad=%d", status->nMsgsReceived, status->nMsgsDiscarded);
+	sprintf(buf, "recvd %d bad %d", status->nMsgsReceived,
+			status->nMsgsDiscarded);
 	m_tft->println(buf);
+	m_tft->println();
 
-	printZones(zoneInfo);
+	if (zoneInfo->is_dirty())
+	{
+		printZones(zoneInfo);
+		zoneInfo->markDirty(false);
+	}
 }
 
 const char* StatusScreen::getName()
