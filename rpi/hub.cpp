@@ -13,8 +13,7 @@
  *
  */
 
-#include <cstdlib>
-#include <iostream>
+#include <stdio.h>
 #include "RF24.h"
 #include "../SOcommon/SOcommon.h"
 #include "../SOcommon/RoomState.h"
@@ -22,8 +21,13 @@
 
 using namespace std;
 
-const int MAX_MSGS = 4;
+const int MAX_MSGS = 3;
 const int OUT_MSG_LEN = 32;
+
+enum mode
+{
+	operational = 0, test, manual
+};
 
 // CE and CSN pins On header using GPIO numbering (not pin numbers)
 RF24 radio("/dev/spidev0.0", 8000000, 25);  // Setup for GPIO 25 CE
@@ -67,14 +71,14 @@ bool sendToDisplay(char buf[][OUT_MSG_LEN], const int nMsgs)
 bool sendToDisplay(char s[])
 {
 	char buf[1][OUT_MSG_LEN];
-	strcpy(buf[0],s);
+	strcpy(buf[0], s);
 
-	return sendToDisplay(buf,1);
+	return sendToDisplay(buf, 1);
 }
 void prepareSensorStateMessage(char *buf, const uint8_t node_id,
-		const char* sensor_id, const bool alerted)
+		const char sensor_id, const bool alerted)
 {
-	sprintf(buf, "S%d %s %1d", node_id, sensor_id, alerted);
+	sprintf(buf, "S%d %c %1d", node_id, sensor_id, alerted);
 }
 
 void setup(void)
@@ -88,7 +92,7 @@ void setup(void)
 	radio.setAutoAck(1);
 	radio.setRetries(3, 15);
 	radio.setDataRate(CFG_RF24_DATA_RATE);
-	radio.setPALevel(RF24_PA_HIGH);
+	radio.setPALevel(RF24_PA_MAX);
 	radio.setChannel(CFG_RF24_CHANNEL);
 	radio.setCRCLength(CFG_RF24_CRC_LENGTH);
 
@@ -114,7 +118,52 @@ void setup(void)
 	usleep(1000);
 }
 
-void loop(void)
+void send_test_messages()
+{
+	char msg[OUT_MSG_LEN];
+	char sensor_types[] =
+	{ 'C', 'W', 'P' };
+	for (int zoneno = 0; zoneno < NUM_ZONES; zoneno++)
+	{
+		for (int sensor_type_index = 0; sensor_type_index < 3;
+				sensor_type_index++)
+		{
+			char c = sensor_types[sensor_type_index];
+			bool sentok = false;
+			while (!sentok)
+			{
+				prepareSensorStateMessage(msg, zoneno, c, true);
+				sentok = sendToDisplay(msg);
+			}
+
+			usleep(1000000);
+			sentok = false;
+			while (!sentok)
+			{
+				prepareSensorStateMessage(msg, zoneno, c, false);
+				sentok = sendToDisplay(msg);
+			}
+		}
+	}
+}
+
+void read_and_send_message()
+{
+	printf("Enter message: ");
+	size_t buflen = 80;
+	char *msg = (char *) malloc(buflen);
+	if (getline(&msg, &buflen, stdin) != -1)
+	{
+		bool sentok = false;
+		while (!sentok)
+		{
+			sentok = sendToDisplay(msg);
+		}
+	}
+
+}
+
+void accept_data_and_send_to_display()
 {
 	char receivePayload[32];
 	uint8_t pipe = 0;
@@ -142,13 +191,11 @@ void loop(void)
 
 		char buf[MAX_MSGS][OUT_MSG_LEN];
 		int bufIndex = 0;
-		prepareSensorStateMessage(buf[bufIndex++], rs.node_id, "c1",
-				rs.contact_alert[0]);
-		prepareSensorStateMessage(buf[bufIndex++], rs.node_id, "c2",
-				rs.contact_alert[1]);
-		prepareSensorStateMessage(buf[bufIndex++], rs.node_id, "c3",
-				rs.contact_alert[2]);
-		prepareSensorStateMessage(buf[bufIndex++], rs.node_id, "p1",
+		prepareSensorStateMessage(buf[bufIndex++], rs.node_id, 'C',
+				rs.contact_alert);
+		prepareSensorStateMessage(buf[bufIndex++], rs.node_id, 'W',
+				rs.window_broken);
+		prepareSensorStateMessage(buf[bufIndex++], rs.node_id, 'P',
 				rs.pir_alert);
 		sendToDisplay(buf, bufIndex);
 
@@ -164,17 +211,48 @@ void loop(void)
 	char msg[32];
 	sprintf(msg, "HHeartbeat %d", heartbeat_counter++);
 	sendToDisplay(msg);
-	radio.print_status();
+	//radio.print_status();
 
 }
 
+void loop(enum mode mymode)
+{
+
+	switch (mymode)
+	{
+	case (test):
+		send_test_messages();
+		break;
+	case (manual):
+		read_and_send_message();
+		break;
+	default:
+		accept_data_and_send_to_display();
+	}
+
+	accept_data_and_send_to_display();
+
+}
 int main(int argc, char** argv)
 {
+	enum mode mymode = operational;
+	int c;
+	while ((c = getopt(argc, argv, "tm")) != -1)
+		switch (c)
+		{
+		case 't':
+			mymode = test;
+			break;
+		case 'm':
+			mymode = manual;
+			break;
+		default:
+			abort();
+		}
 	setup();
 	while (1)
 	{
-		loop();
-		sleep(1);
+		loop(mymode);
 	}
 
 	return 0;
