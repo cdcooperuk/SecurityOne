@@ -154,8 +154,7 @@ boolean initRadio()
 ZoneInfo obtainZoneInfo()
 {
 	ZoneInfo *zi = new ZoneInfo();
-	int nzones = 12;
-	zi->setNumZones(nzones);
+	zi->setNumZones(NUM_ZONES);
 	debug("obtainZoneInfo nzones=")
 	debug(zi->getNumZones())
 	zi->initZone(0, "H1", 0, 0, 0, 0, 0, true);
@@ -239,15 +238,15 @@ void dataReadyHandler(const uint8_t rf24_status)
 			// decipher message
 			if (receivePayload[0] == 'S')
 			{
-				uint8_t zone_num, sensor_num, state;
+				uint8_t zone_num,  state;
 				char sensor_type;
-				sscanf(receivePayload, "S%hhd %c%hhd %hhd", &zone_num,
-						&sensor_type, &sensor_num, &state);
+				sscanf(receivePayload, "S%hhd %c %hhd", &zone_num,
+						&sensor_type, &state);
 //				zone_num = receivePayload[1] - '0';
 //				sensor_type = receivePayload[3];
 //				sensor_num = receivePayload[4] - '0';
 //				state = receivePayload[6] - '0';
-				zoneInfo.setZoneStatus(zone_num, sensor_type, sensor_num,
+				zoneInfo.setZoneStatus(zone_num, sensor_type,
 						state);
 			}
 			else if (receivePayload[0] == 'H')

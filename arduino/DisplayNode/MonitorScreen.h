@@ -13,8 +13,9 @@
 #define COLOUR_OUTLINE   0xBDF7
 #define COLOUR_NYI   0xFFFF
 #define COLOUR_ACTIVE   0x7E0
-#define COLOUR_WARNING   0xFC00
-#define COLOUR_ALERT   0xF800
+#define COLOUR_CONTACT    0xFFE0
+#define COLOUR_WINDOW_BROKEN   0xFC00
+#define COLOUR_PIR   0xFCC6
 
 class MonitorScreen: public Screen
 {

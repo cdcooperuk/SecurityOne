@@ -20,7 +20,8 @@ struct Zone
 	char name[3];
 	uint8_t x, y, w, h;
 	bool nodisplay;
-	volatile bool contact_alert[3];
+	volatile bool contact_alert;
+	volatile bool window_broken;
 	volatile bool pir_alert;
 	volatile bool dirty;
 	// bits indicating which walls have contact sensors
@@ -38,7 +39,7 @@ public:
 	void initZone(int zoneNum, const char *name, uint8_t x, uint8_t y,
 			uint8_t w, uint8_t h, uint8_t contact_walls, bool nodisplay);
 
-	void setZoneStatus(uint8_t zone_num, char sensor_type, uint8_t sensor_num,
+	void setZoneStatus(uint8_t zone_num, char sensor_type,
 			uint8_t state);
 
 	bool is_dirty();

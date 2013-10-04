@@ -34,9 +34,8 @@ void StatusScreen::printZones(ZoneInfo *zoneInfo)
 			m_tft->setTextColor(ST7735_WHITE, ST7735_BLACK);
 			m_tft->print(z.name);
 			m_tft->print(" ");
-			m_tft->print(z.contact_alert[0] ? "1" : " ");
-			m_tft->print(z.contact_alert[1] ? "2" : " ");
-			m_tft->print(z.contact_alert[2] ? "3" : " ");
+			m_tft->print(z.contact_alert ? "C" : " ");
+			m_tft->print(z.window_broken ? "W" : " ");
 			m_tft->print(z.pir_alert ? "P" : " ");
 		}
 		m_tft->println();

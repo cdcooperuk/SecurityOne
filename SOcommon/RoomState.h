@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define PROTOCOL_VERSION 3
+#define PROTOCOL_VERSION 4
 
 class RoomState {
 
@@ -24,7 +24,8 @@ public:
     static uint8_t getCurrentProtocolVersion();
 	uint8_t protocol_version;
 	uint8_t node_id;
-	bool contact_alert[3];
+	bool contact_alert;
+	bool window_broken;
 	bool pir_alert;
 	int msgId;
 };

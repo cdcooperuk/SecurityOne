@@ -19,4 +19,6 @@ unsigned char CFG_RF24_CHANNEL = 0x64;
 rf24_datarate_e CFG_RF24_DATA_RATE = RF24_1MBPS;
 rf24_crclength_e CFG_RF24_CRC_LENGTH = RF24_CRC_16;
 
+
+const int NUM_ZONES=12;
 #endif
