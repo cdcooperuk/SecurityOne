@@ -230,7 +230,6 @@ void loop(enum mode mymode)
 		accept_data_and_send_to_display();
 	}
 
-	accept_data_and_send_to_display();
 
 }
 int main(int argc, char** argv)
@@ -253,6 +252,7 @@ int main(int argc, char** argv)
 	while (1)
 	{
 		loop(mymode);
+		sleep(1);
 	}
 
 	return 0;

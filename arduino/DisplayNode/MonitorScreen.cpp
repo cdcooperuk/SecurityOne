@@ -31,6 +31,20 @@ void MonitorScreen::drawZones(ZoneInfo zoneInfo)
 		}
 	}
 }
+
+void indicateContact(TFT tft, int16_t x, int16_t y, int16_t w, int16_t h)
+{
+	tft.fillRect(x, y, w, h, COLOUR_CONTACT);
+	tft.drawRect(x, y, w, h, COLOUR_OUTLINE);
+}
+
+void indicateBrokenWindow(TFT tft, int16_t x0, int16_t y0, int16_t x1,
+		int16_t y1, int16_t x2, int16_t y2)
+{
+	tft.fillTriangle(x0, y0, x1, y1, x2, y2, COLOUR_WINDOW_BROKEN);
+	tft.drawTriangle(x0, y0, x1, y1, x2, y2, COLOUR_OUTLINE);
+}
+
 void MonitorScreen::drawZone(int i, Zone zone, uint16_t color)
 {
 	if (zone.nodisplay)
@@ -40,6 +54,9 @@ void MonitorScreen::drawZone(int i, Zone zone, uint16_t color)
 
 	// temp
 	uint16_t fillcolor = COLOUR_ACTIVE;
+
+	if (millis() - INACTIVE_TIMEOUT_MS > zone.lastUpdatedMs)
+		fillcolor = COLOUR_INACTIVE;
 
 	if (zone.pir_alert)
 	{
@@ -52,12 +69,14 @@ void MonitorScreen::drawZone(int i, Zone zone, uint16_t color)
 	// overlay contact alert on appropriate wall
 	if (zone.contact_alert)
 	{
-		const uint8_t alertWallThickness = 5;
+		bool oneOrMoreWallsFound = false;
+		const uint8_t alertWallThickness = 8;
 		int x, y, w, h;
 
 		// highlight contact wall(s)
 		if (zone.contact_walls & WALL_TOP)
 		{
+			oneOrMoreWallsFound = true;
 			x = zone.x;
 			y = zone.y;
 			w = zone.w;
@@ -65,6 +84,7 @@ void MonitorScreen::drawZone(int i, Zone zone, uint16_t color)
 		}
 		if (zone.contact_walls & WALL_BOTTOM)
 		{
+			oneOrMoreWallsFound = true;
 			x = zone.x;
 			y = zone.y + zone.h - alertWallThickness;
 			w = zone.w;
@@ -72,6 +92,7 @@ void MonitorScreen::drawZone(int i, Zone zone, uint16_t color)
 		}
 		if (zone.contact_walls & WALL_LEFT)
 		{
+			oneOrMoreWallsFound = true;
 			x = zone.x;
 			y = zone.y;
 			w = alertWallThickness;
@@ -79,59 +100,63 @@ void MonitorScreen::drawZone(int i, Zone zone, uint16_t color)
 		}
 		if (zone.contact_walls & WALL_RIGHT)
 		{
+			oneOrMoreWallsFound = true;
 			x = zone.x + zone.w - alertWallThickness;
 			y = zone.y;
 			w = alertWallThickness;
 			h = zone.h;
 		}
-		m_tft->fillRect(x, y, w, h, COLOUR_CONTACT);
+		if (oneOrMoreWallsFound)
+			indicateContact(*m_tft, x, y, w, h);
 	}
 
-	// window broken: draw an inward point triangle centred on the wall.
+	// window broken: draw an outward point triangle centred on the wall.
 	if (zone.window_broken)
 	{
-		int x1, y1, x2, y2, x3, y3;
+		int x0, y0, x1, y1, x2, y2;
+		bool oneOrMoreWallsFound = false;
 
 		// highlight contact wall(s)
-		if (zone.contact_walls & WALL_TOP)
+		if ((zone.contact_walls & WALL_TOP)
+				|| (zone.contact_walls & WALL_BOTTOM))
 		{
-			x1 = zone.x;
-			x2 = x1 + zone.w;
-			x3 = zone.x + (zone.w / 2);
-
-			y1 = y2 = zone.y;
-			y3 = zone.y + (zone.h / 2);
+			oneOrMoreWallsFound = true;
+			x0 = zone.x;
+			x1 = x0 + zone.w;
+			x2 = zone.x + (zone.w / 2);
+			if (zone.contact_walls & WALL_TOP)
+			{
+				y0 = y1 = zone.y + (zone.h / 2);
+				y2 = zone.y;
+			}
+			if (zone.contact_walls & WALL_BOTTOM)
+			{
+				y0 = y1 = zone.y + (zone.h / 2);
+				y2 = zone.y + zone.h - 1;
+			}
 		}
-		if (zone.contact_walls & WALL_BOTTOM)
+		if ((zone.contact_walls & WALL_LEFT)
+				|| (zone.contact_walls & WALL_RIGHT))
 		{
-			x1 = zone.x;
-			x2 = x1 + zone.w;
-			x3 = zone.x + (zone.w / 2);
+			oneOrMoreWallsFound = true;
+			y0 = zone.y;
+			y1 = y0 + zone.h - 1;
+			y2 = zone.y + (zone.h / 2);
 
-			y1 = y2 = zone.y + zone.h - 1;
-			y3 = zone.y + (zone.h / 2);
+			if (zone.contact_walls & WALL_LEFT)
+			{
+				x0 = x1 = zone.x + (zone.w / 2);
+				x2 = zone.x;
+			}
+			if (zone.contact_walls & WALL_RIGHT)
+			{
+				x0 = x1 = zone.x + (zone.w / 2);
+				x2 = zone.x + zone.w - 1;
+			}
 		}
-		if (zone.contact_walls & WALL_LEFT)
-		{
-			x1 = x2 = zone.x;
-			x3 = zone.x + (zone.w / 2);
+		if (oneOrMoreWallsFound)
+			indicateBrokenWindow(*m_tft, x0, y0, x1, y1, x2, y2);
 
-			y1 = zone.y;
-			y2 = y1 + zone.h - 1;
-			y3 = zone.y + (zone.h / 2);
-		}
-		if (zone.contact_walls & WALL_RIGHT)
-		{
-			x1 = x2 = zone.x + zone.w - 1;
-			x3 = zone.x + (zone.w / 2);
-
-			y1 = zone.y + (zone.h / 2);
-			y2 = y1 + zone.h - 1;
-			y3 = zone.y + (zone.h / 2);
-		}
-
-		m_tft->fillTriangle(x1, y1, x2, y2, x3, y3, COLOUR_WINDOW_BROKEN);
-		m_tft->drawTriangle(x1, y1, x2, y2, x3, y3, COLOUR_OUTLINE);
 	}
 
 	m_tft->setCursor(zone.x + zone.w / 2 - 6, zone.y + zone.h / 2 - 4);
@@ -145,7 +170,9 @@ void MonitorScreen::drawFluff()
 	m_tft->fillRoundRect(113, 5, 10, 50, 3, ST7735_YELLOW);
 	m_tft->fillTriangle(113, 75, 123, 80, 113, 85, ST7735_BLACK);
 	m_tft->drawTriangle(113, 75, 123, 80, 113, 85, ST7735_WHITE);
-	m_tft->fillRoundRect(113, 105, 10, 50, 3, ST7735_BLUE);
+	m_tft->fillCircle(118, 105, 5, ST7735_BLUE);
+	m_tft->fillCircle(118, 125, 5, ST7735_BLUE);
+	m_tft->fillCircle(118, 145, 5, ST7735_BLUE);
 
 }
 

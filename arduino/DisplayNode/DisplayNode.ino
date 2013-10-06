@@ -79,6 +79,10 @@ void setup(void)
 	initKeys();
 
 	tft.print(F("Initializing system\n"));
+	tft.println(F(__DATE__));
+	tft.println(F(__TIME__));
+	tft.println();
+	delay(2000);
 	status.ok = true;
 	strncpy((char*) status.status_text, "OK", 2);
 	if (!initRadio())
@@ -102,6 +106,25 @@ void setup(void)
 
 	attachInterrupt(1, check_radio, FALLING);
 	radio.startListening();
+
+//	tft.background(ST7735_BLACK);
+//	for (uint8_t r = 0xFF; r >=0; r-=0xf)
+//	{
+//		for (uint8_t g = 0; g < 0xFF; g+=0xf)
+//		{
+//			for (uint8_t b = 0; b < 0xFF; b+=0xf)
+//			{
+//				uint16_t c = tft.newColor(r, g, b);
+//				tft.setCursor(0, 0);
+//				tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
+//				tft.print(r);tft.println("  ");
+//				tft.print(g);tft.println("  ");
+//				tft.print(b);tft.println("  ");
+//				tft.print(c);
+//				tft.fillCircle(60, 80, 50, c);
+//			}
+//		}
+//	}
 
 }
 
@@ -158,18 +181,18 @@ ZoneInfo obtainZoneInfo()
 	debug("obtainZoneInfo nzones=")
 	debug(zi->getNumZones())
 	zi->initZone(0, "H1", 0, 0, 0, 0, 0, true);
-	zi->initZone(1, "MB", 40, 5, 40, 22, WALL_TOP, false);
-	zi->initZone(2, "FB", 5, 35, 35, 35, WALL_BOTTOM, false);
-	zi->initZone(3, "BB", 5, 5, 35, 30, WALL_TOP, false);
-	zi->initZone(4, "SB", 70, 27, 20, 20, WALL_BOTTOM, false);
+	zi->initZone(1, "BB", 5, 5, 35, 30, WALL_TOP, false);
+	zi->initZone(2, "MB", 40, 5, 40, 22, WALL_TOP, false);
+	zi->initZone(3, "FB", 5, 35, 35, 35, WALL_BOTTOM, false);
+	zi->initZone(4, "SB", 70, 27, 20, 20, WALL_RIGHT, false); // TEMP
 	zi->initZone(5, "B1", 40, 50, 30, 15, WALL_BOTTOM, false);
 
 	zi->initZone(6, "DR", 5, 85, 35, 30, WALL_TOP, false);
 	zi->initZone(7, "KI", 40, 85, 45, 30, WALL_TOP, false);
-	zi->initZone(8, "LO", 5, 115, 35, 35, WALL_BOTTOM, false);
+	zi->initZone(8, "LO", 5, 115, 35, 35, WALL_LEFT, false); // TEMP
 	zi->initZone(9, "Hg", 0, 0, 0, 0, 0, true);
-	zi->initZone(10, "Bg", 55, 115, 20, 20, 0, false);
-	zi->initZone(11, "GA", 70, 135, 15, 15, WALL_BOTTOM, false);
+	zi->initZone(10, "Bg", 55, 115, 15, 20, 0, false);
+	zi->initZone(11, "GA", 70, 115, 15, 35, WALL_BOTTOM, false);
 	return *zi;
 }
 void periodic_stuff()
@@ -238,16 +261,15 @@ void dataReadyHandler(const uint8_t rf24_status)
 			// decipher message
 			if (receivePayload[0] == 'S')
 			{
-				uint8_t zone_num,  state;
+				uint8_t zone_num, state;
 				char sensor_type;
-				sscanf(receivePayload, "S%hhd %c %hhd", &zone_num,
-						&sensor_type, &state);
+				sscanf(receivePayload, "S%hhd %c %hhd", &zone_num, &sensor_type,
+						&state);
 //				zone_num = receivePayload[1] - '0';
 //				sensor_type = receivePayload[3];
 //				sensor_num = receivePayload[4] - '0';
 //				state = receivePayload[6] - '0';
-				zoneInfo.setZoneStatus(zone_num, sensor_type,
-						state);
+				zoneInfo.setZoneStatus(zone_num, sensor_type, state);
 			}
 			else if (receivePayload[0] == 'H')
 			{
@@ -300,6 +322,7 @@ void loop()
 	{
 		periodic_stuff();
 		lastStatusPrint = millis();
+		zoneInfo.markInactiveDirty();
 	}
 	TIMEIT(updateDisplay, updateDisplay());
 

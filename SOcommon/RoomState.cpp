@@ -11,7 +11,7 @@
 static const char* FMT = "[V%02d #%02d C%1d W%1d P%1d #%d]";
 
 RoomState::RoomState(const int nodeId) :
-		protocol_version(PROTOCOL_VERSION), node_id(nodeId)
+		protocol_version(PROTOCOL_VERSION), node_id(nodeId), msgId(0)
 {
 	contact_alert = false;
 	window_broken = false;

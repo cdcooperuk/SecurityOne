@@ -16,9 +16,9 @@
 const int NODE_ID_EEPROM_ADDRESS = 0;
 
 const int MAX_CONTACTS = 3;
-const int pin_contacts []=
-{	2,NOT_A_PIN,NOT_A_PIN};
-const int pin_window_broken = NOT_A_PIN;
+const int pin_contacts[] =
+{ 2, NOT_A_PIN, NOT_A_PIN };
+const int pin_window_broken = 7;
 
 const int pin_pir = 3;
 
@@ -53,7 +53,7 @@ void setup()
 	printf_begin();
 
 	for (int i = 0; i < MAX_CONTACTS; i++)
-		init_input_pullup (pin_contacts[i]);
+		init_input_pullup(pin_contacts[i]);
 	init_input_pullup(pin_pir);
 	init_input_pullup(pin_pir);
 
@@ -83,13 +83,15 @@ void loop()
 {
 
 	// check inputs contact -- rely on NOT_A_PIN returning 0
-
+	roomState.contact_alert = false;
 	for (int i = 0; i < MAX_CONTACTS; i++)
-		if (isPin(pin_contacts[i]) && digitalRead(pin_contacts[i])){
-			roomState.contact_alert=true;
+		if (isPin(pin_contacts[i]) && digitalRead(pin_contacts[i]))
+		{
+			roomState.contact_alert = true;
 		}
 
-	roomState.window_broken = isPin(pin_window_broken) && digitalRead(pin_window_broken);
+	roomState.window_broken = isPin(pin_window_broken)
+			&& !digitalRead(pin_window_broken);
 
 	roomState.pir_alert = isPin(pin_pir) && digitalRead(pin_pir);
 

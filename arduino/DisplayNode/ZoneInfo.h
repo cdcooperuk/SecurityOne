@@ -15,6 +15,8 @@
 #define WALL_LEFT 4
 #define WALL_RIGHT 8
 
+#define INACTIVE_TIMEOUT_MS 60000
+
 struct Zone
 {
 	char name[3];
@@ -26,6 +28,7 @@ struct Zone
 	volatile bool dirty;
 	// bits indicating which walls have contact sensors
 	uint8_t contact_walls;
+	long lastUpdatedMs;
 };
 
 class ZoneInfo
@@ -44,6 +47,7 @@ public:
 
 	bool is_dirty();
 	void markDirty(bool d);
+	void markInactiveDirty();
 
 	struct Zone *zones;
 private:

@@ -10,6 +10,8 @@
 #include <string.h>
 #include <HardwareSerial.h>
 
+#include "Arduino.h"
+
 ZoneInfo::ZoneInfo()
 {
 	m_numzones = 0;
@@ -47,6 +49,7 @@ void ZoneInfo::initZone(int zoneNum, const char *name, uint8_t x, uint8_t y,
 	z->pir_alert = false;
 	z->nodisplay = nodisplay;
 	z->contact_walls = contact_walls;
+	z->lastUpdatedMs=millis();
 }
 
 void ZoneInfo::setZoneStatus(uint8_t zone_num, char sensor_type, uint8_t status)
@@ -76,6 +79,7 @@ void ZoneInfo::setZoneStatus(uint8_t zone_num, char sensor_type, uint8_t status)
 	bool changed = (prev != status);
 	z->dirty |= changed;
 	m_dirty |= changed;
+	z->lastUpdatedMs = millis();
 }
 
 bool ZoneInfo::is_dirty()
@@ -89,5 +93,14 @@ void ZoneInfo::markDirty(bool b)
 	for (int i = 0; i < m_numzones; i++)
 	{
 		zones[i].dirty = b;
+	}
+}
+void ZoneInfo::markInactiveDirty()
+{
+	for (int i = 0; i < m_numzones; i++)
+	{
+		if (zones[i].lastUpdatedMs - millis() > INACTIVE_TIMEOUT_MS)
+			zones[i].dirty = true;
+		m_dirty = true;
 	}
 }
