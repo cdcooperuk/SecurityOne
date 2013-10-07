@@ -21,7 +21,7 @@
 
 using namespace std;
 
-const int MAX_MSGS = 3;
+const int MAX_MSGS = 6;
 const int OUT_MSG_LEN = 32;
 
 enum mode
@@ -90,7 +90,7 @@ void setup(void)
 	radio.begin();
 	radio.enableDynamicPayloads();
 	radio.setAutoAck(1);
-	radio.setRetries(3, 15);
+	radio.setRetries(0, 3);
 	radio.setDataRate(CFG_RF24_DATA_RATE);
 	radio.setPALevel(RF24_PA_MAX);
 	radio.setChannel(CFG_RF24_CHANNEL);
@@ -118,6 +118,19 @@ void setup(void)
 	usleep(1000);
 }
 
+void heartbeat()
+{
+	static int heartbeat_counter;
+	static time_t last_heartbeat = time(NULL);
+	time_t now = time(NULL);
+	if (last_heartbeat < now)
+	{
+		last_heartbeat = now;
+		char msg[32];
+		sprintf(msg, "HHeartbeat %d", heartbeat_counter++);
+		sendToDisplay(msg);
+	}
+}
 void send_test_messages()
 {
 	char msg[OUT_MSG_LEN];
@@ -207,10 +220,7 @@ void accept_data_and_send_to_display()
 		usleep(20);
 	}
 
-	static int heartbeat_counter;
-	char msg[32];
-	sprintf(msg, "HHeartbeat %d", heartbeat_counter++);
-	sendToDisplay(msg);
+	heartbeat();
 	//radio.print_status();
 
 }
@@ -229,7 +239,6 @@ void loop(enum mode mymode)
 	default:
 		accept_data_and_send_to_display();
 	}
-
 
 }
 int main(int argc, char** argv)
@@ -252,9 +261,8 @@ int main(int argc, char** argv)
 	while (1)
 	{
 		loop(mymode);
-		sleep(1);
+		usleep(10000);
+		//sleep(1);
 	}
-
-	return 0;
 }
 

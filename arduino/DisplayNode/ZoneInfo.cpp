@@ -95,12 +95,3 @@ void ZoneInfo::markDirty(bool b)
 		zones[i].dirty = b;
 	}
 }
-void ZoneInfo::markInactiveDirty()
-{
-	for (int i = 0; i < m_numzones; i++)
-	{
-		if (zones[i].lastUpdatedMs - millis() > INACTIVE_TIMEOUT_MS)
-			zones[i].dirty = true;
-		m_dirty = true;
-	}
-}

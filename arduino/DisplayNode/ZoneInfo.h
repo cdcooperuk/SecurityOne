@@ -47,7 +47,6 @@ public:
 
 	bool is_dirty();
 	void markDirty(bool d);
-	void markInactiveDirty();
 
 	struct Zone *zones;
 private:

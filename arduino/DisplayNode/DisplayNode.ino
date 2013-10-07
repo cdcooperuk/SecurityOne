@@ -197,7 +197,7 @@ ZoneInfo obtainZoneInfo()
 }
 void periodic_stuff()
 {
-
+	zoneInfo.markDirty(true);
 }
 
 void toggleScreen()
@@ -318,11 +318,10 @@ void loop()
 	static unsigned long lastStatusPrint = millis();
 	TIMEIT(handleKeyInput, handleKeyInput());
 	TIMEIT(getRadioInput, getRadioInput());
-	if (lastStatusPrint + 1000 < millis())
+	if (lastStatusPrint + 10000 < millis())
 	{
 		periodic_stuff();
 		lastStatusPrint = millis();
-		zoneInfo.markInactiveDirty();
 	}
 	TIMEIT(updateDisplay, updateDisplay());
 
