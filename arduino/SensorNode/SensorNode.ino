@@ -1,3 +1,7 @@
+// Do not remove the include below
+#include "SensorNode.h"
+#include "printf.h"
+
 #include <RoomState.h>
 #include <SOcommon.h>
 
@@ -8,9 +12,6 @@
 #include <nRF24L01.h>
 #include <EEPROM.h>
 
-// Do not remove the include below
-#include "SensorNode.h"
-#include "printf.h"
 
 // id of this node is burned into eeprom- this way same prog can be used on multiple avrs.
 const int NODE_ID_EEPROM_ADDRESS = 0;
@@ -45,6 +46,22 @@ void init_input_pullup(const uint8_t pin)
 
 	pinMode(pin, INPUT_PULLUP);
 	digitalWrite(pin, HIGH);
+}
+
+/*
+ * voltmeter. see https://code.google.com/p/tinkerit/wiki/SecretVoltmeter
+ */
+int readVccMv() {
+  long result;
+  // Read 1.1V reference against AVcc
+  ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
+  delay(2); // Wait for Vref to settle
+  ADCSRA |= _BV(ADSC); // Convert
+  while (bit_is_set(ADCSRA,ADSC));
+  result = ADCL;
+  result |= ADCH<<8;
+  result = 1126400L / result; // Back-calculate AVcc in mV
+  return result;
 }
 
 void setup()
@@ -97,6 +114,8 @@ void loop()
 
 	roomState.msgId = msgId++;
 
+	roomState.batteryMv=readVccMv();
+
 	char s[30];
 	roomState.toString(s);
 	printf("Now sending RoomState '%s' (%d) ...", s, strlen(s));
@@ -108,7 +127,7 @@ void loop()
 	else
 		printf("failed.\n\r");
 
-	radio.print_status();
+//	radio.print_status();
 
 	// Try again later
 	delay(1000);

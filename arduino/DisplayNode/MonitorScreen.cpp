@@ -55,7 +55,7 @@ void MonitorScreen::drawZone(int i, Zone zone, uint16_t color)
 	// temp
 	uint16_t fillcolor = COLOUR_ACTIVE;
 
-	if (millis() - INACTIVE_TIMEOUT_MS > zone.lastUpdatedMs)
+	if ((millis() - zone.lastUpdatedMs) > INACTIVE_TIMEOUT_MS)
 		fillcolor = COLOUR_INACTIVE;
 
 	if (zone.pir_alert)

@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define PROTOCOL_VERSION 4
+#define PROTOCOL_VERSION 5
 
 class RoomState {
 
@@ -28,6 +28,7 @@ public:
 	bool window_broken;
 	bool pir_alert;
 	int msgId;
+	int batteryMv;
 };
 
 #endif /* ROOMSTATE_H_ */

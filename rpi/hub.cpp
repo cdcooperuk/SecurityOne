@@ -14,6 +14,7 @@
  */
 
 #include <stdio.h>
+//#define SERIAL_DEBUG
 #include "RF24.h"
 #include "../SOcommon/SOcommon.h"
 #include "../SOcommon/RoomState.h"
@@ -181,7 +182,6 @@ void accept_data_and_send_to_display()
 	char receivePayload[32];
 	uint8_t pipe = 0;
 
-//IF_SERIAL_DEBUG(printf("in loop\n"));
 	while (radio.available(&pipe))
 	{
 
@@ -195,8 +195,9 @@ void accept_data_and_send_to_display()
 
 		// Display it on screen
 		IF_SERIAL_DEBUG(
+				printf("raw payload='%s' (%d) on pipe %d\n\r",receivePayload,len,pipe);
 				char buf[80];
-				printf("Recv: size=%i payload=%s pipe=%i",len,rs.toString(buf),pipe));
+				printf("interpreted: payload=%s\n\r",rs.toString(buf)));
 
 //		printf("%d %s node=%d A=%1d B=%1d C=%1d P=%1d\n", clk, hr_clk,
 //				rs.node_id, rs.contact1_alert, rs.contact2_alert,
