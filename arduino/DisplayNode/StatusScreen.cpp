@@ -12,13 +12,11 @@
 StatusScreen::StatusScreen(TFT *tft) :
 		Screen(tft)
 {
-	// TODO Auto-generated constructor stub
 
 }
 
 StatusScreen::~StatusScreen()
 {
-	// TODO Auto-generated destructor stub
 }
 
 void StatusScreen::printZones(ZoneInfo *zoneInfo)

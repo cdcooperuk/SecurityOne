@@ -21,7 +21,6 @@ ZoneInfo::ZoneInfo()
 
 ZoneInfo::~ZoneInfo()
 {
-	// TODO Auto-generated destructor stub
 }
 
 uint8_t ZoneInfo::getNumZones()

@@ -38,7 +38,6 @@ RoomState::RoomState(char* serialized_state)
 
 RoomState::~RoomState()
 {
-	// TODO Auto-generated destructor stub
 }
 
 char* RoomState::toString(char* buf)

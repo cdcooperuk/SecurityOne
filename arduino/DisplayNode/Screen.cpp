@@ -12,7 +12,6 @@ Screen::Screen( TFT *tft) :m_tft(tft) {
 }
 
 Screen::~Screen() {
-	// TODO Auto-generated destructor stub
 }
 
 void Screen::clear(){
