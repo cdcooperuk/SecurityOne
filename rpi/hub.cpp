@@ -91,7 +91,7 @@ void setup(void)
 	radio.begin();
 	radio.enableDynamicPayloads();
 	radio.setAutoAck(1);
-	radio.setRetries(0, 3);
+	radio.setRetries(3, 3);
 	radio.setDataRate(CFG_RF24_DATA_RATE);
 	radio.setPALevel(RF24_PA_MAX);
 	radio.setChannel(CFG_RF24_CHANNEL);
@@ -212,6 +212,7 @@ void accept_data_and_send_to_display()
 		prepareSensorStateMessage(buf[bufIndex++], rs.node_id, 'P',
 				rs.pir_alert);
 		sendToDisplay(buf, bufIndex);
+		printf("battery is at %dmV\n",rs.batteryMv);
 
 		if (rs.isAlert())
 		{

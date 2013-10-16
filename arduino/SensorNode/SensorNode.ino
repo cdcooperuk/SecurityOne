@@ -11,7 +11,7 @@
 #include <RF24_config.h>
 #include <nRF24L01.h>
 #include <EEPROM.h>
-
+#include "LowPower.h"
 
 // id of this node is burned into eeprom- this way same prog can be used on multiple avrs.
 const int NODE_ID_EEPROM_ADDRESS = 0;
@@ -21,7 +21,7 @@ const int pin_contacts[] =
 { 2, NOT_A_PIN, NOT_A_PIN };
 const int pin_window_broken = 7;
 
-const int pin_pir = 3;
+const int pin_pir = 4;
 
 RF24 radio(8, 6);
 
@@ -51,17 +51,19 @@ void init_input_pullup(const uint8_t pin)
 /*
  * voltmeter. see https://code.google.com/p/tinkerit/wiki/SecretVoltmeter
  */
-int readVccMv() {
-  long result;
-  // Read 1.1V reference against AVcc
-  ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
-  delay(2); // Wait for Vref to settle
-  ADCSRA |= _BV(ADSC); // Convert
-  while (bit_is_set(ADCSRA,ADSC));
-  result = ADCL;
-  result |= ADCH<<8;
-  result = 1126400L / result; // Back-calculate AVcc in mV
-  return result;
+int readVccMv()
+{
+	long result;
+	// Read 1.1V reference against AVcc
+	ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
+	delay(2); // Wait for Vref to settle
+	ADCSRA |= _BV(ADSC); // Convert
+	while (bit_is_set(ADCSRA,ADSC))
+		;
+	result = ADCL;
+	result |= ADCH << 8;
+	result = 1126400L / result; // Back-calculate AVcc in mV
+	return result;
 }
 
 void setup()
@@ -114,23 +116,29 @@ void loop()
 
 	roomState.msgId = msgId++;
 
-	roomState.batteryMv=readVccMv();
+	roomState.batteryMv = readVccMv();
 
 	char s[30];
 	roomState.toString(s);
-	printf("Now sending RoomState '%s' (%d) ...", s, strlen(s));
+	if (0)
+		printf("Sending RoomState '%s' (%d) ...", s, strlen(s));
 //	radio.startWrite(&s, strlen(s), true);
 	bool ok = radio.write(&s, strlen(s), false);
 
-	if (ok)
-		printf("ok...\n\r");
-	else
-		printf("failed.\n\r");
+	if (0)
+		if (ok)
+			printf("ok...\n\r");
+		else
+			printf("failed.\n\r");
 
 //	radio.print_status();
 
 	// Try again later
-	delay(1000);
-
+	//delay(1000);
+//	LowPower.idle(SLEEP_8S, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_OFF,
+//			SPI_OFF, USART0_OFF, TWI_OFF);
+	radio.powerUp();
+	LowPower.powerDown(SLEEP_4S, ADC_OFF, BOD_OFF);
+	radio.powerUp();
 }
 
