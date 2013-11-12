@@ -11,22 +11,31 @@
 #include <RF24_config.h>
 #include <nRF24L01.h>
 #include <EEPROM.h>
-#include "LowPower.h"
+#include "LowPower.h" 
+#define DEBUG true
+
+const int MAX_CONTACTS = 3;
 
 // id of this node is burned into eeprom- this way same prog can be used on multiple avrs.
 const int NODE_ID_EEPROM_ADDRESS = 0;
+const int PIR_PIN_EEPROM_ADDRESS = 1;
+const int CONTACT_1_EEPROM_ADDRESS = 2;
+const int CONTACT_2_EEPROM_ADDRESS = 3;
+const int CONTACT_3_EEPROM_ADDRESS = 4;
+const int WINDOW_BREAK_PIN_EEPROM_ADDRESS = 5;
 
-const int MAX_CONTACTS = 3;
 const int pin_contacts[] =
-{ 2, NOT_A_PIN, NOT_A_PIN };
-const int pin_window_broken = 7;
+{ EEPROM.read(CONTACT_1_EEPROM_ADDRESS), EEPROM.read(CONTACT_2_EEPROM_ADDRESS),
+		EEPROM.read(CONTACT_3_EEPROM_ADDRESS) };
+const int pin_window_broken = EEPROM.read(WINDOW_BREAK_PIN_EEPROM_ADDRESS);
 
-const int pin_pir = 4;
+const int pin_pir = EEPROM.read(PIR_PIN_EEPROM_ADDRESS);
 
 RF24 radio(8, 6);
 
 uint8_t myid = EEPROM.read(NODE_ID_EEPROM_ADDRESS);
 RoomState roomState(myid);
+volatile bool window_break_detected = false;
 
 //my address = base + my id
 uint64_t my_addr = CFG_BASE_ADDR + myid;
@@ -66,6 +75,23 @@ int readVccMv()
 	return result;
 }
 
+void printSensorDetails()
+{
+	printf("contact pins");
+	for (int i = 0; i < MAX_CONTACTS; i++)
+	{
+		printf(" %i", pin_contacts[i]);
+	}
+	printf("\n");
+	printf("pir pin %i\n", pin_pir);
+	printf("window break pin %i\n", pin_window_broken);
+}
+
+void windowBreakInterrupt()
+{
+	//Serial.println("*B*");
+	window_break_detected = true;
+}
 void setup()
 {
 	Serial.begin(115200);
@@ -89,12 +115,16 @@ void setup()
 	radio.enableDynamicPayloads();
 
 	radio.openWritingPipe(my_addr);
-//	radio.openWritingPipe(display_addr);
+	//	radio.openWritingPipe(display_addr);
 
-//
-// Dump the configuration of the rf unit for debugging
-//
+	//
+	// Dump the configuration of the rf unit for debugging
+	//
 	radio.printDetails();
+
+	printSensorDetails();
+
+	attachInterrupt(0, windowBreakInterrupt, RISING);
 
 }
 
@@ -109,8 +139,8 @@ void loop()
 			roomState.contact_alert = true;
 		}
 
-	roomState.window_broken = isPin(pin_window_broken)
-			&& !digitalRead(pin_window_broken);
+	roomState.window_broken = isPin(pin_window_broken) && window_break_detected;
+	window_break_detected = false;
 
 	roomState.pir_alert = isPin(pin_pir) && digitalRead(pin_pir);
 
@@ -120,25 +150,35 @@ void loop()
 
 	char s[30];
 	roomState.toString(s);
-	if (0)
+	if (DEBUG)
+	{
 		printf("Sending RoomState '%s' (%d) ...", s, strlen(s));
-//	radio.startWrite(&s, strlen(s), true);
+	}
+	//	radio.startWrite(&s, strlen(s), true);
 	bool ok = radio.write(&s, strlen(s), false);
 
-	if (0)
+	if (DEBUG)
+	{
 		if (ok)
-			printf("ok...\n\r");
+			printf("ok...\n");
 		else
-			printf("failed.\n\r");
+			printf("failed.\n");
+	}
 
-//	radio.print_status();
+	//	radio.print_status();
 
 	// Try again later
 	//delay(1000);
-//	LowPower.idle(SLEEP_8S, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_OFF,
-//			SPI_OFF, USART0_OFF, TWI_OFF);
-	radio.powerUp();
+	//	LowPower.idle(SLEEP_8S, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_OFF,
+	//			SPI_OFF, USART0_OFF, TWI_OFF);
+	if (DEBUG)
+		printf("sleeping...\n");
+	Serial.flush();
+	radio.powerDown();
 	LowPower.powerDown(SLEEP_4S, ADC_OFF, BOD_OFF);
+	if (DEBUG)
+		printf("awake.\n");
 	radio.powerUp();
+	//delay(1000);
 }
 
